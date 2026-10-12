@@ -152,20 +152,20 @@ try {
   const pages = () => browser.contexts().flatMap((context) => context.pages());
   const shell = await waitFor(() => pages().find((page) => page.url().startsWith("file:")), "Applet shell not loaded");
   if (standalone) {
-    const address = shell.getByRole("textbox", { name: "地址栏" });
+    const address = shell.getByRole("textbox", { name: "Address bar" });
     await address.fill(target);
     await address.press("Enter");
   }
   const page = await waitFor(() => pages().find((page) => page.url() === target), "Direct target never loaded");
-  const address = shell.getByRole("textbox", { name: standalone ? "地址栏" : "地址栏只读", exact: true });
+  const address = shell.getByRole("textbox", { name: standalone ? "Address bar" : "Address bar (read-only)", exact: true });
   assert.equal(await address.inputValue(), target, "address bar must retain the launch URL, query and fragment");
   assert.equal(await address.evaluate((input) => input.readOnly), !standalone);
   if (addressOnly)
-    await shell.getByRole("button", { name: /会话状态：.*账号代填未配置/ }).waitFor({ state: "visible" });
+    await shell.getByRole("button", { name: /Session status: .*Account autofill not configured/ }).waitFor({ state: "visible" });
   if (standalone || addressOnly) await page.getByRole("heading", { name: "Standalone browsing works" }).waitFor();
   else {
     await page.locator("#dashboard").waitFor({ state: "visible", timeout: 15_000 });
-    await shell.getByRole("button", { name: /会话状态：.*登录成功/ }).waitFor({ state: "visible" });
+    await shell.getByRole("button", { name: /Session status: .*Signed in/ }).waitFor({ state: "visible" });
   }
   const bootstrap = await shell.evaluate(() => window.webApplet.invoke("bootstrap"));
   assert.equal(bootstrap.proxyUrl, "");
@@ -176,7 +176,7 @@ try {
   assert.equal(await page.evaluate(() => typeof window.webApplet), "undefined");
   await assert.rejects(
     shell.evaluate(() => window.webApplet.invoke("start_web_proxy_recording", {})),
-    /录像未启用/
+    /Recording not enabled/
   );
   await shell.screenshot({
     path: fileURLToPath(new URL(`../../../release/applets/${mode}-runtime.png`, import.meta.url))

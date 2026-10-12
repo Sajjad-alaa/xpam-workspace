@@ -63,11 +63,11 @@ async function start() {
     event.preventDefault();
     void close();
   });
-  win.webContents.on("render-process-gone", () => void close("Web 窗口异常退出"));
+  win.webContents.on("render-process-gone", () => void close("The web window exited unexpectedly"));
   win.webContents.on("will-navigate", (event) => event.preventDefault());
   win.webContents.setWindowOpenHandler(() => ({ action: "deny" }));
   ipcMain.handle("web-proxy:invoke", async (event, command, args = {}) => {
-    if (closing || event.senderFrame !== win.webContents.mainFrame) throw new Error("无效的 Web applet 调用");
+    if (closing || event.senderFrame !== win.webContents.mainFrame) throw new Error("Invalid web applet call");
     if (command === "bootstrap")
       return {
         targetUrl: launch.targetUrl,
@@ -79,7 +79,7 @@ async function start() {
         standalone: launch.standalone
       };
     if (command === "create_web_proxy_view") {
-      if (created) throw new Error("请关闭当前窗口后重新连接");
+      if (created) throw new Error("Close the current window and reconnect");
       created = true;
       args = {
         ...args,
@@ -98,6 +98,6 @@ async function start() {
 
 void start().catch(async () => {
   await app.whenReady();
-  dialog.showErrorBox("JumpServer WebLite", "WebLite 启动失败，请重试；如从 JumpServer 连接，请检查发布机配置。");
+  dialog.showErrorBox("XPAM WebLite", "WebLite failed to start. Try again; if you connected from XPAM, check the publishing host configuration.");
   app.exit(1);
 });

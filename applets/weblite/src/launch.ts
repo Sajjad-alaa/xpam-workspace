@@ -14,19 +14,19 @@ export function standaloneLaunch() {
 }
 
 export function parseLaunch(value: unknown) {
-  if (!value || typeof value !== "object") throw new Error("缺少 Web applet 启动参数");
+  if (!value || typeof value !== "object") throw new Error("Web applet launch parameters are missing");
   // AppletArgs is shared by all applets. Only WebLite interprets Web asset settings.
   const data: Record<string, unknown> = "asset" in value ? appletLaunchData(value) : (value as Record<string, unknown>);
   const text = (key: string, max = 2048) => {
     const value = data[key];
-    if (typeof value !== "string" || !value || value.length > max) throw new Error(`无效启动参数：${key}`);
+    if (typeof value !== "string" || !value || value.length > max) throw new Error(`Invalid launch parameter: ${key}`);
     return value;
   };
   const target = new URL(text("target_url"));
   normalizedWebOrigin(target);
   const allowedUrls = data.allowed_urls === undefined ? [] : data.allowed_urls;
   webProxyNavigationPolicy(target, allowedUrls);
-  if (typeof data.safe_mode !== "boolean") throw new Error("缺少安全模式配置");
+  if (typeof data.safe_mode !== "boolean") throw new Error("Safe mode configuration is missing");
   const localSession = createLocalCredentialSession(target.toString(), data.login);
   return {
     targetUrl: target.toString(),
@@ -39,24 +39,24 @@ export function parseLaunch(value: unknown) {
 
 function appletLaunchData(data: Record<string, unknown>) {
   const object = (value: unknown): Record<string, any> => {
-    if (!value || typeof value !== "object" || Array.isArray(value)) throw new Error("Applet 连接数据无效");
+    if (!value || typeof value !== "object" || Array.isArray(value)) throw new Error("Invalid applet connection data");
     return value;
   };
   const protocol = data.protocol;
-  if (protocol !== "http" && protocol !== "https") throw new Error("Applet 连接协议不是 HTTP/HTTPS");
+  if (protocol !== "http" && protocol !== "https") throw new Error("The applet connection protocol is not HTTP/HTTPS");
   const asset = object(data.asset);
   const raw = asset.address;
-  if (typeof raw !== "string" || !raw.trim() || raw.length > 2048) throw new Error("Web 资产地址无效");
+  if (typeof raw !== "string" || !raw.trim() || raw.length > 2048) throw new Error("Invalid web asset address");
   const address = raw.trim();
   const target = new URL(address.includes("://") ? address : `${protocol}://${address}`);
   normalizedWebOrigin(target);
   const protocols = (value: unknown): Record<string, any>[] => {
     if (value == null) return [];
-    if (!Array.isArray(value)) throw new Error("Applet 协议配置无效");
+    if (!Array.isArray(value)) throw new Error("Invalid applet protocol configuration");
     return value.map(object);
   };
   const port = protocols(asset.protocols).find((item) => item.name === protocol)?.port;
-  if (port !== undefined && (!Number.isInteger(port) || port < 0 || port > 65535)) throw new Error("Web 资产端口无效");
+  if (port !== undefined && (!Number.isInteger(port) || port < 0 || port > 65535)) throw new Error("Invalid web asset port");
   // URL.port omits explicit default ports. Preserve a port explicitly supplied in the address.
   const authority = (address.includes("://") ? address.split("://")[1] : address).split(/[/?#]/)[0];
   if (!/:\d+$/.test(authority) && port) target.port = String(port);
@@ -87,12 +87,12 @@ export async function readLaunch(input: Readable) {
   // 128 script steps plus the account secret must fit in this envelope.
   const chunks: Buffer[] = [];
   let size = 0;
-  const timer = setTimeout(() => input.destroy(new Error("等待启动参数超时")), 15_000);
+  const timer = setTimeout(() => input.destroy(new Error("Timed out waiting for launch parameters")), 15_000);
   try {
     for await (const chunk of input) {
       const buffer = Buffer.from(chunk);
       size += buffer.length;
-      if (size > 1_048_576) throw new Error("启动参数过长");
+      if (size > 1_048_576) throw new Error("Launch parameters are too long");
       chunks.push(buffer);
     }
     if (size === 0) return standaloneLaunch();

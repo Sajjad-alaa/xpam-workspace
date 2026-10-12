@@ -126,7 +126,7 @@ test("applet retains an optional asset navigation allowlist and rejects malforme
     "https://sso.example.com"
   ]);
   for (const allowed_urls of [null, "*", ["*"], ["file:///tmp"], ["https://example.com/path"]])
-    assert.throws(() => parseLaunch({ ...launch, allowed_urls }), /白名单/);
+    assert.throws(() => parseLaunch({ ...launch, allowed_urls }), /allowlist/);
 });
 test("empty or terminal stdin starts an unrestricted standalone browser without credentials", async () => {
   for (const input of [Readable.from([]), Object.assign(Readable.from([]), { isTTY: true })]) {
@@ -144,12 +144,12 @@ test("direct launch needs no Koko endpoint or token and releases credentials onc
   assert.ok(!JSON.stringify(result).includes("one-use-secret"));
   assert.equal((result.localSession as any).selectors.interactive, "id=mfa");
   assert.equal((result.localSession as any).selectors.success, "id=dashboard");
-  await assert.rejects(releaseCredentials(result.localSession, "https://wrong.example.com"), /不匹配/);
+  await assert.rejects(releaseCredentials(result.localSession, "https://wrong.example.com"), /does not match/);
   assert.deepEqual(await releaseCredentials(result.localSession, launch.target_url), {
     username: "tester",
     password: "one-use-secret"
   });
-  await assert.rejects(releaseCredentials(result.localSession, launch.target_url), /已经领取/);
+  await assert.rejects(releaseCredentials(result.localSession, launch.target_url), /already claimed/);
 });
 test("script credentials are bound to explicit SSO origins and disposal prevents late release", async () => {
   const result = parseLaunch({
@@ -166,9 +166,9 @@ test("script credentials are bound to explicit SSO origins and disposal prevents
       }
     }
   });
-  await assert.rejects(releaseCredentials(result.localSession, launch.target_url), /不匹配/);
+  await assert.rejects(releaseCredentials(result.localSession, launch.target_url), /does not match/);
   (result.localSession as any).dispose();
-  await assert.rejects(releaseCredentials(result.localSession, "https://sso.example.com"), /会话已结束/);
+  await assert.rejects(releaseCredentials(result.localSession, "https://sso.example.com"), /session has ended/);
 });
 test("obsolete proxy and recording options cannot enable a Koko session", async () => {
   const result = parseLaunch({
@@ -198,5 +198,5 @@ test("rejects invalid configuration and oversized pipes", async () => {
     { login: { config: { autofill: "script", script: [{ step: 1, command: "select_frame", target: "id=login" }] } } }
   ])
     assert.throws(() => parseLaunch({ ...launch, ...patch }));
-  await assert.rejects(readLaunch(Readable.from([" ".repeat(1_048_577)])), /过长/);
+  await assert.rejects(readLaunch(Readable.from([" ".repeat(1_048_577)])), /too long/);
 });
