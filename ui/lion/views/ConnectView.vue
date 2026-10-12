@@ -8,6 +8,7 @@ import { computed, nextTick, onMounted, onUnmounted, ref, shallowRef, watch } fr
 import { useI18n } from "vue-i18n";
 import { useSftpTransferUi } from "#koko/composables/sftp/useSftpTransferUi";
 import Osk from "@/lion/components/Osk.vue";
+import RemoteAppDock from "@/lion/components/RemoteAppDock.vue";
 import { useGuacamoleClient } from "@/lion/hooks/useGuacamoleClient";
 import { createLionConnectTicket } from "@/lion/hooks/useLionConnectTicket";
 import { useLionEndpoint } from "@/lion/hooks/useLionEndpoint";
@@ -21,7 +22,10 @@ import { registerLionWorkspaceSession } from "@/lion/workspaces/useLionWorkspace
 
 const props = defineProps<{ tabId?: string }>();
 
-const emit = defineEmits<{ disconnected: [message: string, details?: GuacamoleConnectionErrorDetails] }>();
+const emit = defineEmits<{
+  disconnected: [message: string, details?: GuacamoleConnectionErrorDetails];
+  endSession: [];
+}>();
 
 const toast = useToast();
 const { addErrorToast } = useErrorToast();
@@ -415,6 +419,24 @@ const scaleGuaDisplay = (value: number) => {
 };
 
 const isRemoteApp = computed(() => Boolean(sessionObject.value?.remote_app));
+const remoteAppName = computed(() => {
+  const name = sessionObject.value?.remote_app?.name;
+  return typeof name === "string" && name ? name : String(sessionObject.value?.asset?.name || "");
+});
+
+// Manual action only: one Alt+Tab (Alt_L, Tab) so Windows raises the RemoteApp window.
+const bringRemoteAppToFront = () => handleCombineKeys(["65513", "65289"]);
+
+const endRemoteAppSession = () => {
+  // Inside the workspace the parent closes the pane (its normal close path); standalone pages just disconnect.
+  if (props.tabId) {
+    emit("endSession");
+    return;
+  }
+  disconnectGuaclient();
+  lunaCommunicator.sendLuna(LUNA_MESSAGE_TYPE.CLOSE, "");
+  toast.add({ title: t("GuacamoleErrManuallyDisconnected"), color: "info" });
+};
 const shareAdapter = useLionSessionShareAdapter({
   endpointUrl,
   enableShare,
@@ -482,6 +504,14 @@ watch(
       ref="displayRef"
       class="relative flex h-full w-full min-h-0 justify-center"
       :class="[shouldEnableScroll ? 'overflow-auto' : 'overflow-hidden']"
+    />
+
+    <RemoteAppDock
+      v-if="isRemoteApp && connectStatus === 3"
+      :app-name="remoteAppName"
+      :asset-name="sessionObject?.asset?.name"
+      @bring-to-front="bringRemoteAppToFront"
+      @end-session="endRemoteAppSession"
     />
 
     <Osk v-if="showOsk" :keyboard="keyboardLayout" @keyboard-change="handleScreenKeyboard" />

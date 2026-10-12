@@ -105,3 +105,50 @@ export interface GuacamoleConnectionErrorDetails {
   message?: string;
   sessionId?: string;
 }
+
+/** Core's built-in platform for native RDP RemoteApp assets. */
+export const REMOTE_APP_PLATFORM_NAME = "Windows-RemoteApp";
+
+/**
+ * A native RemoteApp session that ends normally sooner than this after it connected is reported as
+ * "the application could not be started"; a later normal end as "the application was closed".
+ * Windows reports no error for a missing/blocked program: it shows no window, and the RDS host logs
+ * the session off once no RemoteApp is running (RemoteAppLogoffTimeLimit=0).
+ * ponytail: one fixed threshold; tune it from timings measured on the RDS host.
+ */
+export const REMOTEAPP_FAILED_START_SECONDS = 15;
+
+// guacd (RDP) uses these when the server ended the session itself (logoff/disconnect), not on failures.
+const NORMAL_SESSION_END_MESSAGES = new Set([
+  "Disconnected.",
+  "Logged off.",
+  "Manually disconnected.",
+  "Manually logged off."
+]);
+const GUAC_STATUS_SUCCESS = 0x0000;
+const GUAC_STATUS_SESSION_CLOSED = 0x0206;
+
+/** True when the session ended without a failure: no error at all, or a guacd logoff/disconnect notice. */
+export function isNormalSessionEnd(details?: Pick<GuacamoleConnectionErrorDetails, "code" | "message">): boolean {
+  if (!details) return true;
+  if (details.code === GUAC_STATUS_SUCCESS) return true;
+  if (details.code !== undefined && details.code !== GUAC_STATUS_SESSION_CLOSED) return false;
+  return NORMAL_SESSION_END_MESSAGES.has(details.message?.trim() || "");
+}
+
+interface RemoteAppSessionLike {
+  remote_app?: unknown;
+  asset?: { platform?: { name?: unknown } | null } | null;
+}
+
+/**
+ * Native RDP RemoteApp (Windows-RemoteApp asset). JumpServer applet sessions also carry `remote_app`,
+ * but their asset is the applet's target asset, which is never on the Windows-RemoteApp platform.
+ */
+export function isNativeRemoteAppSession(session?: RemoteAppSessionLike | null): boolean {
+  return Boolean(session?.remote_app) && session?.asset?.platform?.name === REMOTE_APP_PLATFORM_NAME;
+}
+
+export function remoteAppEndMessageKey(connectedAt: number, endedAt: number = Date.now()) {
+  return endedAt - connectedAt < REMOTEAPP_FAILED_START_SECONDS * 1000 ? "RemoteAppFailedToStart" : "RemoteAppClosed";
+}

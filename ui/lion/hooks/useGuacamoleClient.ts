@@ -11,7 +11,12 @@ import { withLionUrl } from "@/lion/utils/base";
 import { readClipboardText, writeClipboardBlob, writeClipboardText } from "@/lion/utils/clipboard";
 
 import { lunaCommunicator } from "@/lion/utils/lunaBus";
-import { ConvertGuacamoleError as convertGuacamoleError } from "@/lion/utils/status";
+import {
+  ConvertGuacamoleError as convertGuacamoleError,
+  isNativeRemoteAppSession,
+  isNormalSessionEnd,
+  remoteAppEndMessageKey
+} from "@/lion/utils/status";
 
 const testImages: Record<string, string> = {
   /**
@@ -213,6 +218,9 @@ export function useGuacamoleClient(
   const remoteClipboardText = ref<string>("");
   const clipboardPasteTextLimit = computed(() => getClipboardTextLimit("paste"));
   let connectGeneration = 0;
+  // Native RemoteApp: when the session became connected, and whether the tunnel itself failed.
+  let connectedAt = 0;
+  let tunnelFailed = false;
   let inputCleanup: (() => void) | null = null;
   let keyboardListening = false;
   const currentFolderFiles = ref<any>([]);
@@ -279,6 +287,8 @@ export function useGuacamoleClient(
     connectionError.value = "";
     connectionErrorDetails.value = undefined;
     sessionObject.value = {};
+    connectedAt = 0;
+    tunnelFailed = false;
     const generation = connectGeneration;
     loading.value = true;
     currentWidth.value = width || window.innerWidth;
@@ -289,6 +299,7 @@ export function useGuacamoleClient(
     const client = new Guacamole.Client(tunnel);
 
     tunnel.onerror = () => {
+      tunnelFailed = true;
       loading.value = false;
       message.error(t("WebSocketError"));
     };
@@ -545,7 +556,7 @@ export function useGuacamoleClient(
         action_permission.value = dataObj.action_permission || {};
         enableShare.value = action_permission.value.enable_share || false;
         hasClipboardPermission.value = action.enable_copy || action.enable_paste;
-        isRemoteApp.value = dataObj.remote_app;
+        isRemoteApp.value = Boolean(dataObj.remote_app);
         break;
       }
       case "current_user": {
@@ -766,21 +777,31 @@ export function useGuacamoleClient(
     return mouse;
   }
 
+  // Message key for a native RemoteApp session that ended normally after connecting, otherwise "".
+  function remoteAppEndKey(details?: Pick<GuacamoleConnectionErrorDetails, "code" | "message">) {
+    if (!connectedAt || tunnelFailed || !isNativeRemoteAppSession(sessionObject.value)) return "";
+    return isNormalSessionEnd(details) ? remoteAppEndMessageKey(connectedAt) : "";
+  }
+
   function onClientError(status: any) {
     console.error("Guacamole client error:", status);
     loading.value = false;
     const code = typeof status?.code === "number" && Number.isInteger(status.code) ? status.code : undefined;
     const rawMessage = typeof status?.message === "string" ? status.message : "";
-    const msg = t(convertGuacamoleError(rawMessage, code), {
-      PLACEHOLDER: rawMessage
-    });
+    const remoteAppKey = remoteAppEndKey({ code, message: rawMessage });
+    const msg = remoteAppKey
+      ? t(remoteAppKey)
+      : t(convertGuacamoleError(rawMessage, code), {
+          PLACEHOLDER: rawMessage
+        });
     connectionErrorDetails.value = {
       code,
       message: rawMessage,
       sessionId: typeof sessionObject.value?.id === "string" ? sessionObject.value.id : undefined
     };
     connectionError.value = msg;
-    message.error(msg, { duration: 10000 });
+    if (remoteAppKey === "RemoteAppClosed") message.info(msg);
+    else message.error(msg, { duration: 10000 });
   }
 
   function clientStateChanged(state: any) {
@@ -794,6 +815,7 @@ export function useGuacamoleClient(
         break;
       case 3:
         loading.value = false;
+        connectedAt ||= Date.now();
         requestAudioStream(guaClient.value);
         break;
       case 4:
@@ -801,6 +823,10 @@ export function useGuacamoleClient(
         break;
       case 5:
         loading.value = false;
+        if (!connectionError.value) {
+          const remoteAppKey = remoteAppEndKey();
+          if (remoteAppKey) connectionError.value = t(remoteAppKey);
+        }
         lunaCommunicator.sendLuna(LUNA_MESSAGE_TYPE.CLOSE, "");
         guaDisplay.value?.getElement()?.remove();
         break;
