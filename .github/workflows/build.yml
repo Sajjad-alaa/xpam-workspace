@@ -97,6 +97,8 @@ jobs:
       APPLE_ID: ${{ secrets.APPLE_ID }}
       APPLE_ID_PASSWORD: ${{ secrets.APPLE_ID_PASSWORD }}
       APPLE_TEAM_ID: ${{ secrets.APPLE_TEAM_ID }}
+      # XPAM: without Apple signing secrets the macOS build is produced unsigned
+      HAS_APPLE_CERTIFICATE: ${{ secrets.APPLE_CERTIFICATE != '' }}
 
     steps:
       - uses: actions/checkout@v5
@@ -175,7 +177,7 @@ jobs:
           node scripts/apply-brand-assets.mjs --dir "$assets_dir"
 
       - name: Import Apple certificate
-        if: startsWith(matrix.os, 'macos')
+        if: startsWith(matrix.os, 'macos') && env.HAS_APPLE_CERTIFICATE == 'true'
         uses: apple-actions/import-codesign-certs@v7
         with:
           p12-file-base64: ${{ secrets.APPLE_CERTIFICATE }}
@@ -183,7 +185,7 @@ jobs:
           keychain-password: ${{ secrets.KEYCHAIN_PASSWORD }}
 
       - name: Select Apple signing identity
-        if: startsWith(matrix.os, 'macos')
+        if: startsWith(matrix.os, 'macos') && env.HAS_APPLE_CERTIFICATE == 'true'
         shell: bash
         run: |
           signing_identity=$(

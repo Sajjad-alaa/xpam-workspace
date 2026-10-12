@@ -176,7 +176,7 @@ try {
   assert.equal(await page.evaluate(() => typeof window.webApplet), "undefined");
   await assert.rejects(
     shell.evaluate(() => window.webApplet.invoke("start_web_proxy_recording", {})),
-    /Recording not enabled/
+    /recording is not enabled/i
   );
   await shell.screenshot({
     path: fileURLToPath(new URL(`../../../release/applets/${mode}-runtime.png`, import.meta.url))
