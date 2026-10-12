@@ -12,6 +12,7 @@ const website = "https://jumpserver.org";
 
 const productVersion = ref("");
 const licenseCompany = ref("");
+const licenseEditionName = ref("");
 const isEnterpriseEdition = ref(false);
 const showCommunityLinks = ref(false);
 const isWebRuntime = computed(() => !isDesktopRuntime());
@@ -22,7 +23,9 @@ const { t } = useI18n();
 const productInfo = computed(() => [
   {
     label: t("Setting.Product"),
-    value: t(isEnterpriseEdition.value ? "Setting.EnterpriseEdition" : "Setting.CommunityEdition")
+    value: isEnterpriseEdition.value
+      ? (licenseEditionName.value || t("Setting.EnterpriseEdition"))
+      : t("Setting.CommunityEdition")
   },
   { label: t("Common.Version"), value: productVersion.value || "—" },
   { label: t("Setting.LicenseCompany"), value: licenseCompany.value || "—" }
@@ -75,14 +78,40 @@ onMounted(async () => {
   try {
     const settings = await getPublicSettings();
     const corporation = settings.XPACK_LICENSE_INFO?.corporation;
+    const edition = settings.XPACK_LICENSE_INFO?.edition;
     const interfaceVersion = settings.INTERFACE?.version;
-    isEnterpriseEdition.value = settings.XPACK_LICENSE_EDITION_ULTIMATE === true;
-    showCommunityLinks.value = settings.XPACK_LICENSE_IS_VALID !== true;
-    if (typeof interfaceVersion === "string") productVersion.value = interfaceVersion.trim();
-    if (settings.XPACK_LICENSE_IS_VALID === true && typeof corporation === "string") {
-      licenseCompany.value = corporation.trim();
+    const hasLicense = settings.XPACK_LICENSE_IS_VALID === true;
+
+    isEnterpriseEdition.value = hasLicense;
+    showCommunityLinks.value = !hasLicense;
+
+    if (settings.INTERFACE?.login_title) {
+      appName.value = settings.INTERFACE.login_title.trim();
+    } else if (hasLicense) {
+      appName.value = "XPAM";
     }
-    logoSrc.value = resolveInterfaceLogo(settings.INTERFACE?.logo_logout);
+
+    if (hasLicense && typeof edition === "string" && edition.trim()) {
+      licenseEditionName.value = edition.trim();
+    }
+
+    if (typeof interfaceVersion === "string" && interfaceVersion.trim()) {
+      let ver = interfaceVersion.trim();
+      if (hasLicense) {
+        ver = ver.replace(/-ce$/i, "");
+      }
+      productVersion.value = ver;
+    } else if (hasLicense) {
+      productVersion.value = "v5.0.0";
+    }
+
+    if (typeof corporation === "string" && corporation.trim()) {
+      licenseCompany.value = corporation.trim();
+    } else if (hasLicense) {
+      licenseCompany.value = "JumpServer PAM";
+    }
+
+    logoSrc.value = resolveInterfaceLogo(settings.INTERFACE?.logo_logout || settings.INTERFACE?.logo_index);
   } catch {
     showCommunityLinks.value = true;
   }

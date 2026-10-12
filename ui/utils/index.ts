@@ -2,15 +2,7 @@ import type { AssetDetail, AssetDetailField, AssetItem, LangType, PermedProtocol
 import { desktopOs } from "~/shared/desktop/bridge";
 
 const INTL_LOCALE_BY_LANGUAGE: Record<LangType, string> = {
-  zh: "zh-CN",
-  zh_hant: "zh-TW",
-  en: "en",
-  ja: "ja",
-  pt_br: "pt-BR",
-  es: "es",
-  ru: "ru",
-  ko: "ko",
-  vi: "vi"
+  en: "en"
 };
 
 const PROTOCOL_PRIORITY: Record<string, number> = {
@@ -90,19 +82,11 @@ export function normalizeLanguageCode(lang: string | null | undefined): LangType
   const normalized = (lang || "").trim().toLowerCase().replaceAll("_", "-");
   if (!normalized) return "en";
 
-  if (normalized.startsWith("zh")) {
-    return /(?:^|-)hant(?:$|-)|^zh-(?:tw|hk|mo)(?:-|$)/.test(normalized) ? "zh_hant" : "zh";
-  }
-
-  const primary = normalized.split("-")[0] || "";
-  if (primary === "pt") return "pt_br";
-  if (["en", "ja", "es", "ru", "ko", "vi"].includes(primary)) return primary as LangType;
   return "en";
 }
 
 export function toDjangoLanguageCode(lang: LangType) {
-  if (lang === "zh") return "zh-hans";
-  return lang.replaceAll("_", "-");
+  return "en";
 }
 
 export function toIntlLocale(lang: string | null | undefined) {

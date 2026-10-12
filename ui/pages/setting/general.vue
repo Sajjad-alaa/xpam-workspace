@@ -134,7 +134,7 @@ const resolutionItems = computed(() => {
 });
 
 const selectedLanguage = computed<LangType>({
-  get: () => (locale.value as LangType) || "zh",
+  get: () => (locale.value as LangType) || "en",
   set: (code: LangType) => {
     if (!code) return;
     setLang(code);

@@ -161,11 +161,11 @@ const currentLanguageLabel = computed(
   () => languageItems.value.find((item) => item.id === locale.value)?.label || locale.value
 );
 const primaryLanguageItems = computed(() =>
-  ["zh", "en"]
+  ["en"]
     .map((id) => languageItems.value.find((item) => item.id === id))
     .filter((item): item is { id: string; label: string } => Boolean(item))
 );
-const extraLanguageItems = computed(() => languageItems.value.filter((item) => item.id !== "zh" && item.id !== "en"));
+const extraLanguageItems = computed(() => []);
 const extraLanguageLabel = computed(
   () => extraLanguageItems.value.find((item) => item.id === locale.value)?.label || ""
 );

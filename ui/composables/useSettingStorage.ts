@@ -94,7 +94,7 @@ const STORE_KEY = "state";
 const WEB_STORE_KEY = "jumpserver-client:user-setting";
 
 export const DEFAULT_STATE: UserSettingPersistedState = {
-  language: "system",
+  language: "en",
   collapse: false,
   statusBarVisible: true,
   sort: "name",
