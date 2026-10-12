@@ -2,6 +2,23 @@ import { spawn } from "node:child_process";
 import { mkdir, stat, writeFile } from "node:fs/promises";
 import path from "node:path";
 import { electronLog } from "../shared/debug-log";
+import { dialog } from "electron";
+
+async function confirmCommandLaunch(payload) {
+  const command = String(payload.command || "");
+  const shown = command.length > 400 ? `${command.slice(0, 400)}…` : command;
+  const { response } = await dialog.showMessageBox({
+    type: "warning",
+    title: "Run command?",
+    message: "A link is asking to open a terminal and run a command on this computer.",
+    detail: `Target: ${payload.endpoint?.host}:${payload.endpoint?.port}\n\nCommand:\n${shown}\n\nOnly continue if you started this connection yourself.`,
+    buttons: ["Cancel", "Run command"],
+    defaultId: 0,
+    cancelId: 0,
+    noLink: true
+  });
+  return response === 1;
+}
 
 function decodePayload(raw) {
   const value = String(raw || "");
@@ -278,6 +295,12 @@ export class LocalApplicationLauncher {
     if (String(payload.command || "").trim()) {
       if (!["terminal", "iterm2", "linux-terminal", "windows-terminal"].includes(application.launch_driver)) {
         throw new Error("selected application cannot open command payloads");
+      }
+      // jms2:// links are unsigned and any website can open them: never run a command
+      // without the user explicitly confirming exactly what will run.
+      if (!(await confirmCommandLaunch(payload))) {
+        electronLog.warn(`refused jms2 command payload for ${payload.endpoint.host}:${payload.endpoint.port}`);
+        return false;
       }
       return this.launchTerminal(application, payload.command, false);
     }

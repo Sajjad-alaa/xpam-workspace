@@ -27,6 +27,7 @@ describe("lion RemoteApp session status", () => {
     expect(isNormalSessionEnd()).toBe(true);
     expect(isNormalSessionEnd({ code: 0, message: "Disconnected." })).toBe(true);
     expect(isNormalSessionEnd({ code: 518, message: "Logged off." })).toBe(true);
+    expect(isNormalSessionEnd({ code: 523, message: "Logged off." })).toBe(true);
     expect(isNormalSessionEnd({ code: 518, message: "Forcibly disconnected." })).toBe(false);
     expect(isNormalSessionEnd({ code: 769, message: "Authentication failure (invalid credentials?)" })).toBe(false);
     expect(isNormalSessionEnd({ code: 1005, message: "admin" })).toBe(false);

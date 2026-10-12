@@ -427,12 +427,16 @@ const remoteAppName = computed(() => {
 // Manual action only: one Alt+Tab (Alt_L, Tab) so Windows raises the RemoteApp window.
 const bringRemoteAppToFront = () => handleCombineKeys(["65513", "65289"]);
 
+// Standalone page: the client's state handler is detached on disconnect, so hide the dock here.
+const remoteAppEnded = ref(false);
+
 const endRemoteAppSession = () => {
   // Inside the workspace the parent closes the pane (its normal close path); standalone pages just disconnect.
   if (props.tabId) {
     emit("endSession");
     return;
   }
+  remoteAppEnded.value = true;
   disconnectGuaclient();
   lunaCommunicator.sendLuna(LUNA_MESSAGE_TYPE.CLOSE, "");
   toast.add({ title: t("GuacamoleErrManuallyDisconnected"), color: "info" });
@@ -507,7 +511,7 @@ watch(
     />
 
     <RemoteAppDock
-      v-if="isRemoteApp && connectStatus === 3"
+      v-if="isRemoteApp && connectStatus === 3 && !remoteAppEnded"
       :app-name="remoteAppName"
       :asset-name="sessionObject?.asset?.name"
       @bring-to-front="bringRemoteAppToFront"

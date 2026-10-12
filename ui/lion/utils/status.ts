@@ -114,7 +114,7 @@ export const REMOTE_APP_PLATFORM_NAME = "Windows-RemoteApp";
  * "the application could not be started"; a later normal end as "the application was closed".
  * Windows reports no error for a missing/blocked program: it shows no window, and the RDS host logs
  * the session off once no RemoteApp is running (RemoteAppLogoffTimeLimit=0).
- * ponytail: one fixed threshold; tune it from timings measured on the RDS host.
+ * One fixed threshold; tune it from timings measured on the RDS host.
  */
 export const REMOTEAPP_FAILED_START_SECONDS = 15;
 
@@ -126,13 +126,20 @@ const NORMAL_SESSION_END_MESSAGES = new Set([
   "Manually logged off."
 ]);
 const GUAC_STATUS_SUCCESS = 0x0000;
-const GUAC_STATUS_SESSION_CLOSED = 0x0206;
+// guacd reports a server-side logoff/disconnect as RESOURCE_CLOSED (0x0206) or SESSION_CLOSED (0x020B)
+const GUAC_STATUS_RESOURCE_CLOSED = 0x0206;
+const GUAC_STATUS_SESSION_CLOSED = 0x020b;
 
 /** True when the session ended without a failure: no error at all, or a guacd logoff/disconnect notice. */
 export function isNormalSessionEnd(details?: Pick<GuacamoleConnectionErrorDetails, "code" | "message">): boolean {
   if (!details) return true;
   if (details.code === GUAC_STATUS_SUCCESS) return true;
-  if (details.code !== undefined && details.code !== GUAC_STATUS_SESSION_CLOSED) return false;
+  if (
+    details.code !== undefined &&
+    details.code !== GUAC_STATUS_RESOURCE_CLOSED &&
+    details.code !== GUAC_STATUS_SESSION_CLOSED
+  )
+    return false;
   return NORMAL_SESSION_END_MESSAGES.has(details.message?.trim() || "");
 }
 
