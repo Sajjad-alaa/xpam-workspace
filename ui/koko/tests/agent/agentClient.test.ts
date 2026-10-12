@@ -208,7 +208,7 @@ it("includes the response language even without an executor context", async () =
 it("refreshes response language before the next run without changing the command language or user text", async () => {
   const requests: AgentHttpRequest[] = [];
   const client = new AgentClient(kaelRequest(requests));
-  client.setResponseLanguage("zh");
+  client.setResponseLanguage("zh" as never);
   const context = reactive({ language: "shell", selected_asset: { id: "asset-1" }, response_language: "en" });
   const message = {
     message_id: "message-1",
@@ -225,7 +225,7 @@ it("refreshes response language before the next run without changing the command
     // Switching UI language must resend the last uploaded snapshot, not later reactive edits.
     context.selected_asset.id = "asset-2";
     requests.length = 0;
-    client.setResponseLanguage("zh_hant");
+    client.setResponseLanguage("zh_hant" as never);
     await client.sendMessage("panel-1", "resource-1", message);
     expect(requests.map((request) => request.path.split("/").at(-1))).toEqual(["context", "messages", "runs"]);
     expect(requests[0]?.body).toMatchObject({
@@ -309,7 +309,7 @@ it("uploads the current file selection before each run and clears previous selec
     metadata: { context }
   };
   try {
-    client.setResponseLanguage("zh");
+    client.setResponseLanguage("zh" as never);
     await client.createSession({ ...manifest, profile: "file", context: { protocol: "sftp" } }, "auto");
     for (const [index, selectedEntries] of [
       context.selectedEntries,
@@ -459,7 +459,7 @@ it.each([false, true])("sends reactive AI context, messages and results as JSON 
   );
   const client = new AgentClient();
   try {
-    client.setResponseLanguage("pt_br");
+    client.setResponseLanguage("pt_br" as never);
     await client.createSession({ ...manifest, profile: "workspace" }, "auto");
     const state = reactive({ default_terminal_target: { target_id: "target-1", asset_name: "host-a" } });
     // Spreading a reactive context unwraps only its root; the target remains a Vue Proxy.

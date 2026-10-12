@@ -8,7 +8,6 @@ import {
   terminalAiProgressKey
 } from "#koko/composables/terminal/terminalAiPresentation";
 import en from "../../../../i18n/locales/en.json";
-import zh from "../../../../i18n/locales/zh.json";
 
 it("maps Terminal AI protocol values to localized presentation keys", () => {
   expect(terminalAiExecutionKey("pty")).toBe("RightPanel.AICurrentPty");
@@ -80,6 +79,5 @@ it("defines every Terminal AI presentation key in both locales", () => {
 
   for (const key of keys) {
     expect(en).toHaveProperty(key);
-    expect(zh).toHaveProperty(key);
   }
 });

@@ -85,7 +85,7 @@ export function normalizeLanguageCode(lang: string | null | undefined): LangType
   return "en";
 }
 
-export function toDjangoLanguageCode(lang: LangType) {
+export function toDjangoLanguageCode(_lang: LangType) {
   return "en";
 }
 

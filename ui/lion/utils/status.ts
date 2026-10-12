@@ -146,7 +146,7 @@ export function isNormalSessionEnd(details?: Pick<GuacamoleConnectionErrorDetail
 interface RemoteAppSessionLike {
   remote_app?: unknown;
   platform?: { name?: unknown } | null;
-  asset?: { platform?: { name?: unknown } | null } | null;
+  asset?: { name?: unknown; platform?: { name?: unknown } | null } | null;
 }
 
 /**

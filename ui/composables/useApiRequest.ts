@@ -122,10 +122,12 @@ export interface PublicSettings {
   INTERFACE?: {
     login_title?: string;
     logo_logout?: string;
+    logo_index?: string;
     version?: string;
   };
   XPACK_LICENSE_INFO?: {
     corporation?: unknown;
+    edition?: unknown;
   };
   SECURITY_COMMAND_EXECUTION?: boolean;
   SECURITY_WATERMARK_ENABLED?: boolean;

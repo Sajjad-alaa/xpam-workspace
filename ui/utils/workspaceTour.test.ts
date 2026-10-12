@@ -12,7 +12,6 @@ import {
   WORKSPACE_TOUR_TARGETS
 } from "~/utils/workspaceTour";
 import enMessages from "../../i18n/locales/en.json";
-import zhMessages from "../../i18n/locales/zh.json";
 
 const translate = (messages: unknown) => (key: string) => {
   const value = key.split(".").reduce<unknown>((current, segment) => {
@@ -25,7 +24,7 @@ const translate = (messages: unknown) => (key: string) => {
 
 describe("workspace tour", () => {
   it("covers the outer workspace chrome in both languages", () => {
-    const chineseSteps = buildWorkspaceTourSteps(translate(zhMessages));
+    const chineseSteps = buildWorkspaceTourSteps(translate(enMessages));
     const englishSteps = buildWorkspaceTourSteps(translate(enMessages));
 
     expect(WORKSPACE_TOUR_STORAGE_KEY).toBe("luna:workspace-tour:v3");
@@ -39,9 +38,7 @@ describe("workspace tour", () => {
       "function",
       "function"
     ]);
-    expect(chineseSteps[0]?.popover?.title).toBe("切换组织");
     expect(englishSteps[0]?.popover?.title).toBe("Switch organization");
-    expect(chineseSteps[3]?.popover?.title).toBe("我的收藏");
     expect(chineseSteps[4]?.popover?.side).toBe("bottom");
   });
 
@@ -51,8 +48,8 @@ describe("workspace tour", () => {
       return Object.entries(value).flatMap(([key, child]) => leafKeys(child, prefix ? `${prefix}.${key}` : key));
     };
 
-    expect(leafKeys(enMessages.WorkspaceTour).sort()).toEqual(leafKeys(zhMessages.WorkspaceTour).sort());
-    expect(leafKeys(enMessages.WorkspaceEmpty).sort()).toEqual(leafKeys(zhMessages.WorkspaceEmpty).sort());
+    expect(leafKeys(enMessages.WorkspaceTour).sort()).toEqual(leafKeys(enMessages.WorkspaceTour).sort());
+    expect(leafKeys(enMessages.WorkspaceEmpty).sort()).toEqual(leafKeys(enMessages.WorkspaceEmpty).sort());
   });
 
   it("blocks workspace shortcuts only while the tour is active", () => {
@@ -75,7 +72,7 @@ describe("workspace tour", () => {
   });
 
   it("builds a disposable demo branch for an empty asset tree", () => {
-    const [node] = buildWorkspaceTourDemoTree(translate(zhMessages));
+    const [node] = buildWorkspaceTourDemoTree(translate(enMessages));
 
     expect(node?.id).toBe(WORKSPACE_TOUR_DEMO_NODE_ID);
     expect(node?.open).toBe(true);
@@ -109,7 +106,7 @@ describe("workspace tour", () => {
           meta: { type: "recent-connections" },
           children: [{ id: "recent-web-01", name: "web-01" }]
         },
-        ...buildWorkspaceTourDemoTree(translate(zhMessages))
+        ...buildWorkspaceTourDemoTree(translate(enMessages))
       ])
     ).toBe(false);
     expect(

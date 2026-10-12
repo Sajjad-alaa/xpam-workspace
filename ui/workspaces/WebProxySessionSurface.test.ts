@@ -250,7 +250,7 @@ it("keeps the current page usable after a blocked navigation", async () => {
     error: "",
     loading: false,
     autofillPending: false,
-    navigationError: "页面地址不在此资产的访问白名单中"
+    navigationError: "The page address is not on this asset's allowlist"
   });
   expect(surface.error.value).toBe("");
   expect(surface.navigationDisabled.value).toBe(false);
@@ -414,15 +414,15 @@ it("shows login progress after submission and removes the verification panel whe
     interactiveCanComplete: true
   };
   surface.handleState(state);
-  expect(surface.verificationWaitingMessage.value).toBe("正在加载验证区域…");
+  expect(surface.verificationWaitingMessage.value).toBe("Loading the verification area…");
   const submitted = Promise.withResolvers<boolean>();
   desktopWebProxy.completeVerification.mockReturnValueOnce(submitted.promise);
   const completing = surface.completeVerification();
-  expect(surface.verificationWaitingMessage.value).toBe("正在登录…");
+  expect(surface.verificationWaitingMessage.value).toBe("Signing in…");
   surface.autofillStatus.value = "submitted";
   submitted.resolve(true);
   await completing;
-  expect(surface.verificationWaitingMessage.value).toBe("正在登录…");
+  expect(surface.verificationWaitingMessage.value).toBe("Signing in…");
   // A late interactive flag must not reopen the panel after autofill has ended.
   surface.handleState({ ...state, autofillPending: false });
   expect(surface.interactivePending.value).toBe(false);
@@ -446,7 +446,7 @@ it("only offers manual completion when enabled by the main process and preserves
   surface.verificationFrame.value = { image: "verification", width: 100, height: 100, revision: 1 };
   desktopWebProxy.completeVerification.mockResolvedValueOnce(false);
   await surface.completeVerification();
-  expect(surface.verificationCompletionError.value).toContain("重试");
+  expect(surface.verificationCompletionError.value).toContain("try again");
   expect(surface.error.value).toBe("");
   expect(surface.verificationFrame.value).not.toBeNull();
   await surface.completeVerification();
@@ -462,20 +462,20 @@ it("only offers manual completion when enabled by the main process and preserves
 
 it.each([
   [false, false, ""],
-  [false, true, "录像未启用"],
-  [false, undefined, "录像未启用"],
-  [true, true, "录像准备中"]
+  [false, true, "Recording not enabled"],
+  [false, undefined, "Recording not enabled"],
+  [true, true, "Preparing recording"]
 ])("summarizes recording with enabled=%s and supported=%s", (enabled, supported, label) => {
   const { surface, props } = setupSurface();
   props.request.recordingEnabled = enabled as boolean;
   props.request.recordingSupported = supported as boolean | undefined;
   surface.autofillStatus.value = "unavailable";
-  expect(surface.statusSummary.value).toBe(`正在连接 · 账号代填未配置${label ? ` · ${label}` : ""}`);
+  expect(surface.statusSummary.value).toBe(`Connecting · Account autofill not configured${label ? ` · ${label}` : ""}`);
   if (enabled) {
     surface.recordingStatus.value = "recording";
-    expect(surface.statusSummary.value).toContain("录像中");
+    expect(surface.statusSummary.value).toContain("Recording");
   } else {
     props.request.proxyUrl = "";
-    expect(surface.statusSummary.value).toContain("远程会话录像");
+    expect(surface.statusSummary.value).toContain("Remote session recording");
   }
 });

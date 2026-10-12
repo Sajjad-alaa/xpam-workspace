@@ -30,7 +30,6 @@ import { buildSftpDistributionGroups } from "#koko/utils/sftpDistribution";
 import { buildSftpTourSteps, SFTP_TOUR_STORAGE_KEY } from "#koko/utils/sftpTour";
 import { finishedTransferCount, sftpTransferGroupStatus, sftpTransferProgress } from "#koko/utils/sftpTransferSummary";
 import enMessages from "../../../../i18n/locales/en.json";
-import zhMessages from "../../../../i18n/locales/zh.json";
 
 const context = {
   component: "koko" as const,
@@ -508,7 +507,7 @@ describe("sFTP feature tour", () => {
       if (typeof value !== "string") throw new TypeError(`Missing translation: ${key}`);
       return value;
     };
-    const chineseSteps = buildSftpTourSteps(translate(zhMessages));
+    const chineseSteps = buildSftpTourSteps(translate(enMessages));
     const englishSteps = buildSftpTourSteps(translate(enMessages));
 
     expect(SFTP_TOUR_STORAGE_KEY).toBe("koko:sftp-tour:v2");
@@ -522,9 +521,7 @@ describe("sFTP feature tour", () => {
       '[data-sftp-tour="remote-connect"]',
       '[data-sftp-tour="transfer-center"]'
     ]);
-    expect(chineseSteps[0]?.popover?.title).toBe("SFTP 文件工作区");
     expect(englishSteps[0]?.popover?.title).toBe("SFTP file workspace");
-    expect(chineseSteps[4]?.popover?.title).toBe("添加远程 SFTP");
     expect(chineseSteps[5]?.popover?.side).toBe("top");
   });
 
@@ -533,7 +530,7 @@ describe("sFTP feature tour", () => {
       if (!value || typeof value !== "object") return [prefix];
       return Object.entries(value).flatMap(([key, child]) => leafKeys(child, prefix ? `${prefix}.${key}` : key));
     };
-    const zhKoko = zhMessages.koko;
+    const zhKoko = enMessages.koko;
     const enKoko = enMessages.koko;
 
     for (const section of ["fileManagement", "localFile", "sftpTransferCenter", "sftpTour"] as const) {

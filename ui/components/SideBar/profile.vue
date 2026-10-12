@@ -165,7 +165,7 @@ const primaryLanguageItems = computed(() =>
     .map((id) => languageItems.value.find((item) => item.id === id))
     .filter((item): item is { id: string; label: string } => Boolean(item))
 );
-const extraLanguageItems = computed(() => []);
+const extraLanguageItems = computed(() => [] as { id: string; label: string }[]);
 const extraLanguageLabel = computed(
   () => extraLanguageItems.value.find((item) => item.id === locale.value)?.label || ""
 );

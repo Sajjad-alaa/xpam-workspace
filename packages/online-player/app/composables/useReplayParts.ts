@@ -6,7 +6,6 @@ import { resolveReplayPartPayload } from "#online-player/utils/replay";
 import { formatDurationLabel } from "#online-player/utils/time";
 
 export function useReplayParts(replay: MaybeRefOrGetter<Replay | null>, sessionId: MaybeRefOrGetter<string>) {
-  const { locale } = useI18n();
   const parts = ref<ReplayPartItem[]>([]);
   const current = ref<ReplayPartItem | null>(null);
   const loading = ref(false);
@@ -46,7 +45,7 @@ export function useReplayParts(replay: MaybeRefOrGetter<Replay | null>, sessionI
         id: toValue(replay)?.id || sid,
         name: filename,
         sizeLabel: prettyBytes(size || 0),
-        durationLabel: formatDurationLabel(duration || 0, locale.value === "zh"),
+        durationLabel: formatDurationLabel(duration || 0, false),
         partIndex
       };
 
