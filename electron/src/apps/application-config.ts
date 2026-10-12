@@ -158,7 +158,7 @@ export class ApplicationConfigService {
   constructor(app, projectRoot) {
     this.app = app;
     this.projectRoot = projectRoot;
-    this.configDir = path.join(app.getPath("appData"), "jumpserver-client");
+    this.configDir = path.join(app.getPath("appData"), "xpam-client");
     this.statePath = path.join(this.configDir, "plugins-state.json");
     this.userPluginsDir = path.join(this.configDir, "plugins");
   }

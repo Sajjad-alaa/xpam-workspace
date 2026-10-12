@@ -19,7 +19,7 @@ const electronRoot = path.dirname(fileURLToPath(import.meta.url));
 const repositoryRoot = path.resolve(electronRoot, "..");
 const iconsRoot = path.join(electronRoot, "assets", "icons");
 const stagedResources = path.join(repositoryRoot, ".electron-resources");
-const executableName = "jumpserver";
+const executableName = "xpam";
 const helperEntitlements = path.join(electronRoot, "assets", "entitlements", "ssh-helper.plist");
 const appleId = process.env.APPLE_ID || "";
 const appleIdPassword = process.env.APPLE_ID_PASSWORD || "";
@@ -115,14 +115,14 @@ async function copyRuntimeNativeModules(buildPath: string) {
 const config: ForgeConfig = {
   outDir: path.join(repositoryRoot, "release", "electron"),
   packagerConfig: {
-    appBundleId: "com.jumpserver.client",
+    appBundleId: "com.xpam.client",
     appCategoryType: "public.app-category.developer-tools",
     executableName,
     asar: {
       unpack: "**/node_modules/node-pty/**"
     },
     extendInfo: {
-      NSCameraUsageDescription: "JumpServer uses the camera for local face verification and presence monitoring."
+      NSCameraUsageDescription: "XPAM uses the camera for local face verification and presence monitoring."
     },
     icon: path.join(iconsRoot, process.platform === "win32" ? "icon.ico" : "icon.icns"),
     extraResource: [
@@ -137,7 +137,7 @@ const config: ForgeConfig = {
     },
     protocols: [
       {
-        name: "JumpServer URL",
+        name: "XPAM URL",
         schemes: [CLIENT_PROTOCOL]
       }
     ],
@@ -208,8 +208,8 @@ const config: ForgeConfig = {
     new MakerNsis({
       projectDir: electronRoot,
       options: {
-        appId: "com.jumpserver.client",
-        protocols: [{ name: "JumpServer URL", schemes: [CLIENT_PROTOCOL] }],
+        appId: "com.xpam.client",
+        protocols: [{ name: "XPAM URL", schemes: [CLIENT_PROTOCOL] }],
         win: {
           executableName,
           icon: path.join(iconsRoot, "icon.ico"),
@@ -238,9 +238,9 @@ const config: ForgeConfig = {
       exe: `${executableName}.exe`,
       icon: path.join(iconsRoot, "icon.ico"),
       programFilesFolderName: "Client",
-      nestedFolderName: "JumpServer",
+      nestedFolderName: "XPAM",
       language: 1033,
-      manufacturer: "JumpServer",
+      manufacturer: "XPAM",
       ui: { chooseDirectory: true },
       windowsSign: windowsSignOptions
     }),

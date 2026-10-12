@@ -6,7 +6,7 @@ const METHODS = ["log", "info", "warn", "error", "debug"] as const;
 export type DebugLogLevel = (typeof METHODS)[number];
 
 const DEFAULT_MAX_LINES = 2000;
-const DEFAULT_FILE_NAME = "jumpserver-debug.log";
+const DEFAULT_FILE_NAME = "xpam-debug.log";
 
 type ConsoleLike = Pick<Console, DebugLogLevel>;
 

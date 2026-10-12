@@ -3,7 +3,7 @@ import runtimePackage from "../package.json";
 import { findClientProtocolUrl, registerClientProtocol } from "./shared/client-protocol";
 
 async function start() {
-  app.setName(runtimePackage.productName || "JumpServer");
+  app.setName(runtimePackage.productName || "XPAM");
   const protocolUrl = findClientProtocolUrl(process.argv);
   if (!app.requestSingleInstanceLock({ protocolUrl: protocolUrl || "" })) {
     app.quit();

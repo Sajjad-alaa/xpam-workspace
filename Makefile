@@ -25,7 +25,7 @@ stop: ## 停止并移除开发代理
 
 .PHONY: help
 help: ## 显示帮助信息
-	@echo "JumpServer (Electron)"
+	@echo "XPAM (Electron)"
 	@awk 'BEGIN {FS = ":.*?## "} /^[a-zA-Z_-]+:.*?## / {printf "  %-20s %s\n", $$1, $$2}' $(MAKEFILE_LIST)
 
 .PHONY: check-env

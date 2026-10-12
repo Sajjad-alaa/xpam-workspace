@@ -1,10 +1,10 @@
 {
-  "name": "jumpserver-client-electron",
-  "productName": "JumpServer",
+  "name": "xpam-client",
+  "productName": "XPAM",
   "version": "5.0.0",
   "private": true,
-  "description": "Electron runtime for JumpServer",
-  "author": "JumpServer",
+  "description": "XPAM desktop client",
+  "author": "XPAM",
   "license": "MIT",
   "main": ".vite/build/bootstrap.js",
   "scripts": {

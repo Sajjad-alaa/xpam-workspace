@@ -67,7 +67,7 @@ test("NSIS builder resolves the download cache API required on clean machines", 
 
 test("packaged clients claim jms2 without taking the legacy client's jms scheme", async () => {
   const config = await configPromise;
-  assert.deepEqual(config.packagerConfig.protocols, [{ name: "JumpServer URL", schemes: ["jms2"] }]);
+  assert.deepEqual(config.packagerConfig.protocols, [{ name: "XPAM URL", schemes: ["jms2"] }]);
 });
 
 test("Windows installers provide a directory selection wizard and preserve the client identity", async () => {
@@ -87,7 +87,7 @@ test("Windows installers provide a directory selection wizard and preserve the c
   assert.equal(options.nsis.oneClick, false);
   assert.equal(options.nsis.selectPerMachineByDefault, true);
   const installerInclude = await readFile(options.nsis.include, "utf8");
-  assert.ok(installerInclude.includes('!define APP_FILENAME "JumpServer\\Client"'));
+  assert.ok(installerInclude.includes('!define APP_FILENAME "XPAM\\Client"'));
   assert.equal(options.nsis.allowToChangeInstallationDirectory, true);
   assert.equal(options.nsis.createDesktopShortcut, true);
   assert.equal(options.nsis.createStartMenuShortcut, true);
@@ -95,7 +95,7 @@ test("Windows installers provide a directory selection wizard and preserve the c
   assert.equal(options.nsis.deleteAppDataOnUninstall, false);
   assert.deepEqual(wix.config.ui, { chooseDirectory: true });
   assert.equal(wix.config.defaultInstallMode, "perMachine");
-  assert.equal(wix.config.nestedFolderName, "JumpServer");
+  assert.equal(wix.config.nestedFolderName, "XPAM");
   assert.equal(wix.config.programFilesFolderName, "Client");
 });
 
@@ -104,14 +104,14 @@ test("normalizes release installer filenames", async (context) => {
   const makeDir = await mkdtemp(path.join(os.tmpdir(), "jms-forge-artifacts-"));
   context.after(() => rm(makeDir, { recursive: true, force: true }));
   const fixtures = [
-    ["darwin", "arm64", "JumpServer-5.0.0-beta6-arm64.dmg", "JumpServer-5.0.0-beta6-arm64.dmg"],
-    ["darwin", "x64", "JumpServer-5.0.0-beta6-x64.dmg", "JumpServer-5.0.0-beta6-x64.dmg"],
-    ["win32", "x64", "JumpServer-5.0.0-beta6 Setup.exe", "JumpServer-5.0.0-beta6-Setup.exe"],
-    ["win32", "x64", "jumpserver.msi", "JumpServer-5.0.0-beta6.msi"],
-    ["linux", "x64", "jumpserver-client-electron_5.0.0~beta6_amd64.deb", "JumpServer-5.0.0-beta6-x64.deb"],
-    ["linux", "arm64", "jumpserver-client-electron_5.0.0~beta6_arm64.deb", "JumpServer-5.0.0-beta6-arm64.deb"],
-    ["linux", "x64", "jumpserver-client-electron-5.0.0.beta6-1.x86_64.rpm", "JumpServer-5.0.0-beta6-x64.rpm"],
-    ["linux", "arm64", "jumpserver-client-electron-5.0.0.beta6-1.arm64.rpm", "JumpServer-5.0.0-beta6-arm64.rpm"]
+    ["darwin", "arm64", "XPAM-5.0.0-beta6-arm64.dmg", "XPAM-5.0.0-beta6-arm64.dmg"],
+    ["darwin", "x64", "XPAM-5.0.0-beta6-x64.dmg", "XPAM-5.0.0-beta6-x64.dmg"],
+    ["win32", "x64", "XPAM-5.0.0-beta6 Setup.exe", "XPAM-5.0.0-beta6-Setup.exe"],
+    ["win32", "x64", "xpam.msi", "XPAM-5.0.0-beta6.msi"],
+    ["linux", "x64", "xpam-client_5.0.0~beta6_amd64.deb", "XPAM-5.0.0-beta6-x64.deb"],
+    ["linux", "arm64", "xpam-client_5.0.0~beta6_arm64.deb", "XPAM-5.0.0-beta6-arm64.deb"],
+    ["linux", "x64", "xpam-client-5.0.0.beta6-1.x86_64.rpm", "XPAM-5.0.0-beta6-x64.rpm"],
+    ["linux", "arm64", "xpam-client-5.0.0.beta6-1.arm64.rpm", "XPAM-5.0.0-beta6-arm64.rpm"]
   ] as const;
   const results: ForgeMakeResult[] = [];
   for (const [platform, arch, original] of fixtures) {
@@ -122,7 +122,7 @@ test("normalizes release installer filenames", async (context) => {
     results.push({
       platform,
       arch,
-      packageJSON: { productName: "JumpServer", version: "5.0.0-beta6" },
+      packageJSON: { productName: "XPAM", version: "5.0.0-beta6" },
       artifacts: [artifact]
     });
   }

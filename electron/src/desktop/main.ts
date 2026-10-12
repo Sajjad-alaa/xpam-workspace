@@ -56,7 +56,7 @@ const projectRoot = isDevelopment ? path.resolve(appRoot, "..") : process.resour
 const macDockIconSize = 512;
 const macDockIconInset = 48;
 const trayIconSize = process.platform === "darwin" ? 20 : 16;
-const defaultProductName = "JumpServer";
+const defaultProductName = "XPAM";
 const productName = String(runtimePackage.productName || defaultProductName);
 const allowDevTools = isDevelopment || productNameAllowsDevTools(productName, String(runtimePackage.version || ""));
 app.setName(productName);
@@ -142,7 +142,7 @@ function installConnectorSessionHooks(targetSession) {
           allowedKokoOrigins.has(httpOrigin);
         let activeSiteOrigin = "";
         try {
-          activeSiteOrigin = normalizedHttpOrigin(authService.currentSession().origin, "JumpServer site");
+          activeSiteOrigin = normalizedHttpOrigin(authService.currentSession().origin, "XPAM site");
         } catch {
           // No authenticated site is available yet.
         }
@@ -489,7 +489,7 @@ function createWindow(label = "main", options: CreateWindowOptions = {}) {
 
   const isMac = process.platform === "darwin";
   const win = new BrowserWindow({
-    title: options.title || "JumpServer",
+    title: options.title || "XPAM",
     icon: loadAppIcon(),
     width: options.width || 1300,
     height: options.height || 780,

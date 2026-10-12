@@ -96,7 +96,7 @@ test("trims to max lines and can clear the log file", async (context) => {
 
 test("reloads previous log lines from disk", async (context) => {
   const logsDir = await withLogsDir(context);
-  await writeFile(path.join(logsDir, "jumpserver-debug.log"), "old line\n");
+  await writeFile(path.join(logsDir, "xpam-debug.log"), "old line\n");
   const service = new DebugLogService({ logsDir, console: fakeConsole().console });
   await service.initialize();
   assert.equal(service.read(), "old line");
