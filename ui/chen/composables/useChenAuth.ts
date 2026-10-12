@@ -33,7 +33,7 @@ export function useChenAuth(tab: Ref<WorkspaceSessionTab>, endpointUrl: Ref<stri
     try {
       auth = await authChen(tokenId, disableAutoHash.value, endpointUrl.value);
     } catch (cause) {
-      error.value = `Chen authentication failed: ${cause instanceof Error ? cause.message : String(cause)}`;
+      error.value = `WebConnector authentication failed: ${cause instanceof Error ? cause.message : String(cause)}`;
       throw new Error(error.value);
     }
 
@@ -47,7 +47,7 @@ export function useChenAuth(tab: Ref<WorkspaceSessionTab>, endpointUrl: Ref<stri
     try {
       profile.value = await fetchChenProfile(chenToken.value, endpointUrl.value);
     } catch (cause) {
-      error.value = `Chen profile failed: ${cause instanceof Error ? cause.message : String(cause)}`;
+      error.value = `WebConnector profile failed: ${cause instanceof Error ? cause.message : String(cause)}`;
       throw new Error(error.value);
     }
 

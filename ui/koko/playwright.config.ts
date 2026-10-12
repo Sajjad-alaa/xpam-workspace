@@ -18,7 +18,7 @@ export default defineConfig({
   workers: 1,
   reporter: process.env.CI ? "github" : "list",
   use: {
-    baseURL: `${origin}/luna/`,
+    baseURL: `${origin}/workspace/`,
     browserName: "chromium",
     headless: true,
     locale: "en-US",
@@ -29,7 +29,7 @@ export default defineConfig({
   webServer: {
     command: `pnpm exec nuxt dev --dotenv .env.development --host ${host} --port ${port}`,
     cwd: workspaceRoot,
-    url: `${origin}/luna/files?tool_window=1`,
+    url: `${origin}/workspace/files?tool_window=1`,
     reuseExistingServer: !process.env.CI,
     timeout: 180_000
   }

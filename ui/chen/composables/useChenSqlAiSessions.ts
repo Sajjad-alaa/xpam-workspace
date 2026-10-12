@@ -544,7 +544,7 @@ function sendToolFrame(session: ChenSqlAiSession, frame: KokoMcpRequestFrame | K
   }
   if (!session.sendFrame(kokoMcpWireMessage(outgoing))) {
     if (proposalRequestId) session.proposalRequestIds.delete(proposalRequestId);
-    throw new ChenSqlAiClientError("unavailable", "Chen SQL tools are unavailable");
+    throw new ChenSqlAiClientError("unavailable", "WebConnector SQL tools are unavailable");
   }
 }
 

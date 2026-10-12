@@ -2,6 +2,7 @@ import type { SessionWindowConnectionInfo } from "~/composables/useSessionWindow
 import type { AssetItem } from "~/types";
 import { buildSessionPath } from "~/composables/useSessionWindowConnect";
 import { desktopWindow } from "~/shared/desktop/bridge";
+import { getWebAppBasePath, joinPrefixedPath } from "~/utils/runtime";
 
 export type WindowConnectionInfo = SessionWindowConnectionInfo;
 
@@ -14,8 +15,10 @@ export const useAssetWindowLauncher = () => {
     const url = buildWindowUrl(asset, connectionInfo);
 
     if (!isDesktopRuntime()) {
-      const target = new URL(url, window.location.origin);
-      if (target.origin !== window.location.origin || !target.pathname.startsWith("/session/")) {
+      // XPAM: the web build is served under /workspace/, so session windows live below that base
+      const base = getWebAppBasePath();
+      const target = new URL(joinPrefixedPath(base, url), window.location.origin);
+      if (target.origin !== window.location.origin || !target.pathname.startsWith(`${base.replace(/\/$/, "")}/session/`)) {
         throw new Error("Invalid session window URL");
       }
       globalThis.open(target, "_blank", "noopener,noreferrer");

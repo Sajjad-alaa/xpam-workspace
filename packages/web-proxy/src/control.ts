@@ -5,15 +5,15 @@ function controlUrl(proxyUrl, path) {
   try {
     proxy = proxyUrl instanceof URL ? proxyUrl : new URL(proxyUrl);
   } catch (cause) {
-    throw new Error("Koko Web Proxy 地址不是有效 URL", { cause });
+    throw new Error("SecureConnection web proxy 地址不是有效 URL", { cause });
   }
   if (proxy.protocol !== "http:" || !proxy.hostname || proxy.username || proxy.password) {
-    throw new Error("Koko Web Proxy 地址必须是不含凭据的 HTTP URL");
+    throw new Error("SecureConnection web proxy 地址必须是不含凭据的 HTTP URL");
   }
 
   const target = new URL(path, proxy);
   if (target.origin !== proxy.origin || !target.pathname.startsWith("/_jumpserver/")) {
-    throw new Error("无效的 Koko Web Proxy 控制接口地址");
+    throw new Error("无效的 SecureConnection web proxy 控制接口地址");
   }
   return {
     proxy,

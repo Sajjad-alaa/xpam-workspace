@@ -32,8 +32,8 @@ describe("resolveWorkspaceBrand", () => {
   });
 
   it("formats the title with the localized workspace label", () => {
-    expect(formatWorkspaceTitle("JumpServer", "工作台")).toBe("Luna - JumpServer 工作台");
-    expect(formatWorkspaceTitle("JumpServer", "Workspace")).toBe("Luna - JumpServer Workspace");
+    expect(formatWorkspaceTitle("JumpServer", "工作台")).toBe("JumpServer 工作台");
+    expect(formatWorkspaceTitle("JumpServer", "Workspace")).toBe("JumpServer Workspace");
   });
 
   it("keeps the public interface favicon when present", () => {

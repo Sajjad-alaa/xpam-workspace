@@ -14,6 +14,6 @@ export async function createLionConnectTicket(baseUrl: string, tokenId = "") {
     throw error;
   }
 
-  if (isDesktopRuntime()) throw new Error("Koko did not return a Lion connect ticket");
+  if (isDesktopRuntime()) throw new Error("SecureConnection did not return a remote desktop connect ticket");
   return "";
 }

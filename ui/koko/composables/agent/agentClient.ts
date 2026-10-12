@@ -92,7 +92,7 @@ export class AgentHttpError extends Error {
     readonly status: number,
     readonly responseBody = ""
   ) {
-    super(`Kael request failed with HTTP ${status}${responseBody ? `: ${responseBody}` : ""}`);
+    super(`AI service request failed with HTTP ${status}${responseBody ? `: ${responseBody}` : ""}`);
     this.name = "AgentHttpError";
     let body: { code?: unknown; detail?: unknown } = {};
     try {
@@ -109,7 +109,7 @@ export class AgentInstanceChangedError extends Error {
   readonly code = "agent_instance_changed";
 
   constructor(expected: string, received: string) {
-    super(`Kael instance changed for the resource session: expected ${expected}, received ${received}`);
+    super(`AI service instance changed for the resource session: expected ${expected}, received ${received}`);
     this.name = "AgentInstanceChangedError";
   }
 }
@@ -156,7 +156,7 @@ async function defaultAgentRequest<T>(request: AgentHttpRequest): Promise<T> {
 
 function sessionPath(sessionId: string, suffix = "") {
   const normalized = sessionId.trim();
-  if (!normalized) throw new Error("Kael panel session id is required");
+  if (!normalized) throw new Error("AI service panel session id is required");
   return `${KAEL_API_ROOT}/panel-sessions/${encodeURIComponent(normalized)}${suffix ? `/${suffix}` : ""}`;
 }
 
@@ -201,22 +201,22 @@ export class AgentClient {
 
   async bootstrap(resourceSessionId: string, force = false): Promise<AgentBootstrapResponse> {
     const resourceId = resourceSessionId.trim();
-    if (!resourceId) throw new Error("Resource session id is required for Kael bootstrap");
+    if (!resourceId) throw new Error("Resource session id is required for AI service bootstrap");
     const cached = this.bootstraps.get(resourceId);
     if (cached && !force) return cached;
     const response = await this.request<KaelBootstrap>({ method: "GET", path: `${KAEL_API_ROOT}/bootstrap` });
     if (response.agent_engine !== "codex" || response.agent_protocol_version !== 1) {
-      throw new Error("This Luna build requires the Codex harness version of Kael");
+      throw new Error("This workspace build requires the Codex harness version of the AI service");
     }
     const instanceId = String(response.cluster_id || response.instance_id || "");
-    if (!instanceId) throw new Error("Kael bootstrap did not return an instance id");
+    if (!instanceId) throw new Error("AI service bootstrap did not return an instance id");
     const previous = this.instanceByResource.get(resourceId);
     if (previous && previous !== instanceId) throw new AgentInstanceChangedError(previous, instanceId);
     if (String(response.protocol_version) !== String(AGENT_PROTOCOL_VERSION)) {
-      throw new Error(`Unsupported Kael protocol version: ${response.protocol_version}`);
+      throw new Error(`Unsupported AI service protocol version: ${response.protocol_version}`);
     }
     if (String(response.capability_version) !== String(AGENT_CAPABILITY_VERSION)) {
-      throw new Error(`Unsupported Kael capability version: ${response.capability_version}`);
+      throw new Error(`Unsupported AI service capability version: ${response.capability_version}`);
     }
     const value: AgentBootstrapResponse = {
       csrf_token: "",
@@ -531,7 +531,7 @@ export class AgentClient {
   private binding(sessionId: string, resourceSessionId: string) {
     const binding = this.bindings.get(sessionId);
     if (!binding || binding.resourceSessionId !== resourceSessionId) {
-      throw new Error("Kael panel session binding is unavailable");
+      throw new Error("AI service panel session binding is unavailable");
     }
     return binding;
   }

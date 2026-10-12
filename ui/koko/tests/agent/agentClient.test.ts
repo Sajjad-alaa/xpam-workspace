@@ -79,14 +79,14 @@ it.each([false, true])("rebuilds an expired panel without deleting its conversat
     expect(requests.some((input) => input.path.includes("/conversations"))).toBe(false);
     expect(requests[0]?.body).toMatchObject({ conversation_id: "conversation-1", approval_mode: "always" });
     expect(requests[1]).toMatchObject({
-      path: "/kael/api/v1/panel-sessions/panel-2/context",
+      path: "/ai/api/v1/panel-sessions/panel-2/context",
       body: { base_version: 0, data: { selected_asset_id: "asset-1" } }
     });
     expect(requests[2]?.body).toMatchObject({
       base_registry_revision: 0,
       registrations: [{ name: "terminal_context" }]
     });
-    if (fail) expect(requests.at(-1)).toMatchObject({ method: "DELETE", path: "/kael/api/v1/panel-sessions/panel-2" });
+    if (fail) expect(requests.at(-1)).toMatchObject({ method: "DELETE", path: "/ai/api/v1/panel-sessions/panel-2" });
   } finally {
     client.dispose();
   }
@@ -135,7 +135,7 @@ it("bootstraps Kael with the authenticated organization", async () => {
   await client.bootstrap("resource-1");
 
   expect(fetchMock).toHaveBeenCalledWith(
-    "/kael/api/v1/bootstrap",
+    "/ai/api/v1/bootstrap",
     expect.objectContaining({ headers: expect.objectContaining({ "X-JMS-ORG": "org-1" }) })
   );
   client.dispose();
@@ -153,11 +153,11 @@ it("creates a capability conversation, panel, context, and atomic registration s
   });
 
   expect(requests.map((request) => [request.method, request.path])).toEqual([
-    ["GET", "/kael/api/v1/bootstrap"],
-    ["POST", "/kael/api/v1/conversations"],
-    ["POST", "/kael/api/v1/panel-sessions"],
-    ["PUT", "/kael/api/v1/panel-sessions/panel-1/context"],
-    ["PUT", "/kael/api/v1/panel-sessions/panel-1/registrations"]
+    ["GET", "/ai/api/v1/bootstrap"],
+    ["POST", "/ai/api/v1/conversations"],
+    ["POST", "/ai/api/v1/panel-sessions"],
+    ["PUT", "/ai/api/v1/panel-sessions/panel-1/context"],
+    ["PUT", "/ai/api/v1/panel-sessions/panel-1/registrations"]
   ]);
   expect(requests.at(-1)?.body).toMatchObject({
     base_registry_revision: 0,
@@ -386,7 +386,7 @@ it.each([
       release();
       await Promise.all([pending, cancelled]);
       expect(requests.filter((request) => request.path.endsWith("/cancel"))).toEqual([
-        { method: "POST", path: "/kael/api/v1/runs/run-1/cancel", body: { reason } }
+        { method: "POST", path: "/ai/api/v1/runs/run-1/cancel", body: { reason } }
       ]);
     }
   } finally {

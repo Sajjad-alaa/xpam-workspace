@@ -73,7 +73,7 @@ export interface KubernetesTerminalMcpMessage {
 function websocketUrl(context: ConnectorSessionContext) {
   const params = new URLSearchParams({ token: context.tokenId, type: "k8s" });
   if (context.ticket) params.set("ticket", context.ticket);
-  return `${toWsOrigin(context.endpointUrl)}/koko/ws/terminal/?${params}`;
+  return `${toWsOrigin(context.endpointUrl)}/secureconnection/ws/terminal/?${params}`;
 }
 
 export function useKubernetesTerminalSocket(): KubernetesTerminalSocketClient {

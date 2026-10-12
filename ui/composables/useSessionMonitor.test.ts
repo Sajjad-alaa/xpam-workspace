@@ -60,11 +60,11 @@ it.each(["koko", "lion"])("enters the %s monitor selected by the running session
   await mocks.mounted.mock.calls[0]![0]();
   expect(mocks.endpoint).toHaveBeenCalledWith({ protocol: "https", sessionId: "session" }, "org");
   expect(String(mocks.fetch.mock.calls[0]![0])).toBe(
-    "https://endpoint.example:9443/koko/api/monitor/session/?ticket=ticket"
+    "https://endpoint.example:9443/secureconnection/api/monitor/session/?ticket=ticket"
   );
   expect(state.component.value).toBe(component);
   expect(resolveWsUrl(component as "koko" | "lion", "terminal", state.sessionContext.value!)).toBe(
-    "wss://endpoint.example:9443/koko/ws/monitor/?ticket=ticket&type=monitor&target_id=session"
+    "wss://endpoint.example:9443/secureconnection/ws/monitor/?ticket=ticket&type=monitor&target_id=session"
   );
 });
 

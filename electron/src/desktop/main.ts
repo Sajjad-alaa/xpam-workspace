@@ -49,7 +49,7 @@ import { resolveExecutablePath } from "./executable-path";
 
 const electronDir = __dirname;
 const appRoot = app.getAppPath();
-const rendererUrl = process.env.JMS_ELECTRON_RENDERER_URL || "http://localhost:3000/luna/";
+const rendererUrl = process.env.JMS_ELECTRON_RENDERER_URL || "http://localhost:3000/workspace/";
 const isDevelopment = process.env.JMS_ELECTRON_DEV === "1" || !app.isPackaged;
 const projectRoot = isDevelopment ? path.resolve(appRoot, "..") : process.resourcesPath;
 const macDockIconSize = 512;
@@ -134,10 +134,10 @@ function installConnectorSessionHooks(targetSession) {
       try {
         const target = parseUrl(details.url);
         const httpOrigin = `${target.protocol === "wss:" ? "https:" : "http:"}//${target.host}`;
-        const isChenSocket = target.pathname.startsWith("/chen/ws/") && allowedChenOrigins.has(httpOrigin);
+        const isChenSocket = target.pathname.startsWith("/webconnector/ws/") && allowedChenOrigins.has(httpOrigin);
         // Lion is hosted by Koko and needs the same desktop WebSocket origin handling.
         const isKokoSocket =
-          (target.pathname.startsWith("/koko/ws/") || target.pathname.startsWith("/koko/lion/ws/")) &&
+          (target.pathname.startsWith("/secureconnection/ws/") || target.pathname.startsWith("/secureconnection/desktop/ws/")) &&
           allowedKokoOrigins.has(httpOrigin);
         let activeSiteOrigin = "";
         try {
@@ -203,7 +203,7 @@ async function proxyChenRequest(request, url) {
   }
   const endpoint = url.searchParams.get("__jms_chen_endpoint") || "";
   url.searchParams.delete("__jms_chen_endpoint");
-  if (!allowedChenOrigins.has(endpoint)) return new Response("Forbidden Chen endpoint", { status: 403 });
+  if (!allowedChenOrigins.has(endpoint)) return new Response("Forbidden WebConnector endpoint", { status: 403 });
   if (request.method === "OPTIONS") return new Response(null, { status: 204, headers: corsHeaders });
 
   const target = parseUrl(`${url.pathname}${url.search}`, endpoint);
@@ -369,9 +369,10 @@ function closeLocalShell(event, sessionId) {
   electronLog.info(`local shell close ${sessionId}`);
 }
 
-function rendererTarget(target = "/luna/") {
+function rendererTarget(target = "/workspace/") {
   if (isDevelopment) return parseUrl(target, rendererUrl).toString();
-  const desktopTarget = target === "/luna" ? "/" : target.replace(/^\/luna\//, "/");
+  // XPAM: the web build lives under /workspace/ (legacy /luna/ is still accepted)
+  const desktopTarget = /^\/(?:workspace|luna)$/.test(target) ? "/" : target.replace(/^\/(?:workspace|luna)\//, "/");
   const normalized = desktopTarget.startsWith("/") ? desktopTarget : `/${desktopTarget}`;
   return `jms-app://app${normalized}`;
 }
@@ -580,7 +581,7 @@ function createWindow(label = "main", options: CreateWindowOptions = {}) {
     clearDesktopEventSubscriptions(windowWebContents);
     faceEngine?.stopOwner(windowWebContentsId);
   });
-  void win.loadURL(rendererTarget(options.url || "/luna/"));
+  void win.loadURL(rendererTarget(options.url || "/workspace/"));
   return win;
 }
 
@@ -760,7 +761,7 @@ function openAboutWindow() {
   installNavigationGuard(win);
   win.once("ready-to-show", () => win.show());
   win.on("closed", () => windows.delete(label));
-  void win.loadURL(rendererTarget(`/luna/about.html?${query}`));
+  void win.loadURL(rendererTarget(`/workspace/about.html?${query}`));
   return win;
 }
 
@@ -1312,7 +1313,7 @@ async function registerProtocols() {
   protocol.handle("jms-app", async (request) => {
     const url = parseUrl(request.url);
     const relative = decodeURIComponent(url.pathname).replace(/^\/+/, "");
-    if (relative.startsWith("chen/")) return proxyChenRequest(request, url);
+    if (relative.startsWith("webconnector/")) return proxyChenRequest(request, url);
     const root = path.join(projectRoot, "dist");
     let candidate = path.resolve(root, relative || "index.html");
     if (!candidate.startsWith(`${root}${path.sep}`) && candidate !== root)
@@ -1321,7 +1322,7 @@ async function registerProtocols() {
       const info = await stat(candidate);
       if (info.isDirectory()) candidate = path.join(candidate, "index.html");
     } catch {
-      if (/^(?:api|chen|core|koko|lion|media|static|ws)(?:\/|$)/.test(relative)) {
+      if (/^(?:api|ai|core|media|secureconnection|static|webconnector|ws)(?:\/|$)/.test(relative)) {
         return new Response("Not found", { status: 404, headers: { "content-type": "text/plain; charset=utf-8" } });
       }
       candidate = path.join(root, "index.html");

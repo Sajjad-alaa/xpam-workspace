@@ -38,7 +38,7 @@ const SOCKET_CLOSING = 2;
 const SOCKET_CLOSED = 3;
 
 export function chenHttpPath(path: string, endpointUrl = window.location.origin) {
-  const connectorPath = `/chen${path.startsWith("/") ? path : `/${path}`}`;
+  const connectorPath = `/webconnector${path.startsWith("/") ? path : `/${path}`}`;
   const endpoint = new URL(endpointUrl || window.location.origin, window.location.origin);
 
   if (endpoint.origin === window.location.origin) {

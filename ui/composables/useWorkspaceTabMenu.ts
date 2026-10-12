@@ -42,7 +42,7 @@ async function buildPayload(tab: Pick<WorkspaceSessionTab, "payload">, token: Re
       baseUrl: webProxy.ticketEndpoint,
       tokenId: token.id
     });
-    if (!ticket) throw new Error("Koko 未返回 Web Proxy connect ticket");
+    if (!ticket) throw new Error("SecureConnection 未返回 Web Proxy connect ticket");
     webProxy = { ...webProxy, ticket };
   }
   return {

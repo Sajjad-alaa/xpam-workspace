@@ -166,13 +166,13 @@ export default defineNuxtConfig({
         port: Number(process.env.JMS_HMR_PORT || 3001)
       },
       proxy: {
-        "/kael/": {
+        "/ai/": {
           target: kaelTarget,
           secure: false,
           changeOrigin: true,
           configure: configureHttpProxy("kael", kaelTarget)
         },
-        "/workspace/koko/ws/": {
+        "/workspace/secureconnection/ws/": {
           target: kokoTarget.replace(/^http/i, "ws"),
           secure: false,
           ws: true,
@@ -180,14 +180,14 @@ export default defineNuxtConfig({
           rewrite: (path) => path.replace(/^\/workspace/, ""),
           configure: bindProxyErrorHandler("luna-koko-ws")
         },
-        "/koko/lion/": {
+        "/secureconnection/desktop/": {
           target: lionTarget,
           secure: false,
           ws: true,
           changeOrigin: true,
           configure: configureHttpProxy("lion", lionTarget)
         },
-        "/koko/": {
+        "/secureconnection/": {
           target: kokoTarget,
           secure: false,
           ws: true,
@@ -224,14 +224,14 @@ export default defineNuxtConfig({
           changeOrigin: true,
           configure: rewriteProxyOrigin(jumpServerTarget)
         },
-        "/chen": {
+        "/webconnector": {
           target: chenTarget,
           secure: false,
           ws: true,
           changeOrigin: true,
           configure: configureHttpProxy("chen", chenTarget)
         },
-        "/kael": {
+        "/ai/ws/": {
           target: kaelTarget,
           secure: false,
           ws: true,

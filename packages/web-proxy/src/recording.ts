@@ -73,10 +73,10 @@ export class WebProxyRecording {
         body: JSON.stringify({ session_id: sessionId, target_url: targetUrl, width, height })
       });
     } catch (error) {
-      throw new Error(`启动 Koko Web 录像失败: ${error}`);
+      throw new Error(`启动 SecureConnection web 录像失败: ${error}`);
     }
     const started = await responseJson(response, "启动 Koko Web 录像失败");
-    if (typeof started.id !== "string" || !started.id) throw new Error("Koko 返回的 Web 录像 ID 为空");
+    if (typeof started.id !== "string" || !started.id) throw new Error("SecureConnection 返回的 Web 录像 ID 为空");
 
     const recording = new WebProxyRecording({ label, id: started.id, endpoint, proxyUrl, proxyAuth, capture, emit });
     recording.emitState("recording", "Web 录像已开始");
@@ -204,7 +204,7 @@ export class WebProxyRecording {
         FINISH_TIMEOUT_MS
       );
     } catch (error) {
-      throw new Error(`结束 Koko Web 录像失败: ${error}`);
+      throw new Error(`结束 SecureConnection web 录像失败: ${error}`);
     }
     const finished = await responseJson(response, "结束 Koko Web 录像失败");
     if (Number.isInteger(finished.frame_count)) this.frameCount = finished.frame_count;

@@ -37,9 +37,9 @@ export const LIGHT_THEME_PRESETS: ThemePresetOption[] = [
 ];
 
 export const DARK_THEME_PRESETS: ThemePresetOption[] = [
-  { id: "luna-default", label: "Luna Default", accent: "#1ab394", family: "luna", baseColor: "#483D3D" },
-  { id: "luna-darkgray", label: "Luna DarkGray", accent: "#1ab394", family: "luna", baseColor: "#303237" },
-  { id: "luna-deepblue", label: "Luna DeepBlue", accent: "#1ab394", family: "luna", baseColor: "#1A212C" },
+  { id: "luna-default", label: "Workspace Default", accent: "#1ab394", family: "luna", baseColor: "#483D3D" },
+  { id: "luna-darkgray", label: "Workspace DarkGray", accent: "#1ab394", family: "luna", baseColor: "#303237" },
+  { id: "luna-deepblue", label: "Workspace DeepBlue", accent: "#1ab394", family: "luna", baseColor: "#1A212C" },
   { id: "mocha", label: "Catppuccin Mocha", accent: "#fab387" },
   { id: "macchiato", label: "Catppuccin Macchiato", accent: "#f5a97f" },
   { id: "frappe", label: "Catppuccin Frappe", accent: "#ca9ee6" },

@@ -24,7 +24,7 @@ export function parseSchemaOverview(value: unknown): ChenSchemaOverview {
     !Array.isArray(value.diagram) ||
     !(typeof value.ddl === "string" || value.ddl === null)
   ) {
-    throw new Error("Chen returned malformed schema overview metadata");
+    throw new Error("WebConnector returned malformed schema overview metadata");
   }
 
   return {
@@ -42,7 +42,7 @@ export function parseSchemaOverview(value: unknown): ChenSchemaOverview {
         !isNullableNumber(statistic.estimatedRows) ||
         !isNullableNumber(statistic.totalSizeBytes)
       ) {
-        throw new Error("Chen returned malformed schema overview metadata");
+        throw new Error("WebConnector returned malformed schema overview metadata");
       }
       return statistic as unknown as ChenSchemaOverview["statistics"][number];
     }),
@@ -68,7 +68,7 @@ function parseSchemaOverviewCapabilities(value: Record<string, unknown>): ChenSc
     "diagramRelationships"
   ] as const;
   if (keys.some((key) => typeof value[key] !== "boolean")) {
-    throw new Error("Chen returned malformed schema overview metadata");
+    throw new Error("WebConnector returned malformed schema overview metadata");
   }
   return {
     tableRows: value.tableRows as boolean,
@@ -112,7 +112,7 @@ function parseSchemaDiagramTable(value: unknown): ChenSchemaDiagramTable {
         !isStringArray(foreignKey.referencedColumns)
     )
   ) {
-    throw new Error("Chen returned malformed schema diagram metadata");
+    throw new Error("WebConnector returned malformed schema diagram metadata");
   }
   return value as unknown as ChenSchemaDiagramTable;
 }
@@ -129,7 +129,7 @@ function parseSchemaOverviewTable(value: unknown): ChenSchemaOverviewTable {
     !isNullableString(value.collation) ||
     !isNullableString(value.comment)
   ) {
-    throw new Error("Chen returned malformed schema overview metadata");
+    throw new Error("WebConnector returned malformed schema overview metadata");
   }
   return value as unknown as ChenSchemaOverviewTable;
 }
@@ -142,7 +142,7 @@ function parseSchemaOverviewView(value: unknown): ChenSchemaOverviewView {
     typeof value.type !== "string" ||
     !isNullableString(value.comment)
   ) {
-    throw new Error("Chen returned malformed schema overview metadata");
+    throw new Error("WebConnector returned malformed schema overview metadata");
   }
   return value as unknown as ChenSchemaOverviewView;
 }
@@ -159,7 +159,7 @@ function parseSchemaOverviewIndex(value: unknown): ChenSchemaOverviewIndex {
     !isNullableString(value.method) ||
     !isNullableString(value.definition)
   ) {
-    throw new Error("Chen returned malformed schema overview metadata");
+    throw new Error("WebConnector returned malformed schema overview metadata");
   }
   return value as unknown as ChenSchemaOverviewIndex;
 }

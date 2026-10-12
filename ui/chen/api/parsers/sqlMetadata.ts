@@ -14,7 +14,7 @@ export function parseQualifiedRelation(value: unknown): ChenQualifiedRelation {
     typeof value.name !== "string" ||
     !(value.kind === "table" || value.kind === "view" || value.kind === "materialized_view")
   ) {
-    throw new Error("Chen returned malformed SQL relation metadata");
+    throw new Error("WebConnector returned malformed SQL relation metadata");
   }
   return {
     catalog: value.catalog,
@@ -26,7 +26,7 @@ export function parseQualifiedRelation(value: unknown): ChenQualifiedRelation {
 
 export function parseSqlRelationsResponse(value: unknown): ChenRelationMetadataPage {
   if (!isRecord(value) || !Array.isArray(value.items) || typeof value.truncated !== "boolean") {
-    throw new Error("Chen returned malformed SQL relation metadata");
+    throw new Error("WebConnector returned malformed SQL relation metadata");
   }
 
   return {
@@ -37,12 +37,12 @@ export function parseSqlRelationsResponse(value: unknown): ChenRelationMetadataP
 
 export function parseSqlColumnsResponse(value: unknown): ChenRelationColumnsMetadata[] {
   if (!isRecord(value) || !Array.isArray(value.items)) {
-    throw new Error("Chen returned malformed SQL column metadata");
+    throw new Error("WebConnector returned malformed SQL column metadata");
   }
 
   return value.items.map((item) => {
     if (!isRecord(item) || !Array.isArray(item.columns)) {
-      throw new Error("Chen returned malformed SQL column metadata");
+      throw new Error("WebConnector returned malformed SQL column metadata");
     }
     return {
       relation: parseQualifiedRelation(item.relation),
@@ -53,7 +53,7 @@ export function parseSqlColumnsResponse(value: unknown): ChenRelationColumnsMeta
           !(typeof column.dataType === "string" || column.dataType === null) ||
           typeof column.nullable !== "boolean"
         ) {
-          throw new Error("Chen returned malformed SQL column metadata");
+          throw new Error("WebConnector returned malformed SQL column metadata");
         }
         return {
           name: column.name,

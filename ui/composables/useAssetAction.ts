@@ -385,24 +385,24 @@ export const useAssetAction = () => {
 
     switch (component) {
       case "chen":
-        return joinEndpointUrl(endpointUrl, withWebSitePrefix(`/chen/connect?${params.toString()}`));
+        return joinEndpointUrl(endpointUrl, withWebSitePrefix(`/webconnector/connect?${params.toString()}`));
       case "tinker":
       case "lion":
       case "panda":
         return joinEndpointUrl(
           endpointUrl,
-          withWebSitePrefix(`/workspace/lion/connect?token=${encodeURIComponent(tokenId)}`)
+          withWebSitePrefix(`/workspace/desktop/connect?token=${encodeURIComponent(tokenId)}`)
         );
       case "koko":
       case "default":
         params.set("_", String(Date.now()));
         if (method?.value === "web_sftp") {
           params.set("asset", body.asset);
-          return joinEndpointUrl(endpointUrl, withWebSitePrefix(`/koko/elfinder/sftp/?${params.toString()}`));
+          return joinEndpointUrl(endpointUrl, withWebSitePrefix(`/secureconnection/elfinder/sftp/?${params.toString()}`));
         }
-        return joinEndpointUrl(endpointUrl, withWebSitePrefix(`/koko/connect/?${params.toString()}`));
+        return joinEndpointUrl(endpointUrl, withWebSitePrefix(`/workspace/terminal/connect?${params.toString()}`));
       default:
-        return joinEndpointUrl(endpointUrl, withWebSitePrefix(`/koko/connect/?${params.toString()}`));
+        return joinEndpointUrl(endpointUrl, withWebSitePrefix(`/workspace/terminal/connect?${params.toString()}`));
     }
   };
 
@@ -760,7 +760,7 @@ export const useAssetAction = () => {
           baseUrl: ticketEndpoint,
           tokenId: token.id
         });
-        if (!ticket) throw new Error("Koko 未返回 Web Proxy connect ticket");
+        if (!ticket) throw new Error("SecureConnection 未返回 Web Proxy connect ticket");
         const settings = await getPublicSettings();
         webProxy = {
           ...webProxy,

@@ -33,12 +33,12 @@ function setup(env: Record<string, string> = {}, origin = "https://jumpserver.te
 }
 
 for (const method of ["apiRequest", "apiStreamRequest"]) {
-  const request = { method: "GET", service: "kael", path: "/kael/api/v1/bootstrap" };
+  const request = { method: "GET", service: "kael", path: "/ai/api/v1/bootstrap" };
 
   test(`${method}: development renderer does not override the selected Kael site`, async () => {
     const { auth, requests, session } = setup({
       JMS_ELECTRON_DEV: "1",
-      JMS_ELECTRON_RENDERER_URL: "http://127.0.0.1:3000/luna/"
+      JMS_ELECTRON_RENDERER_URL: "http://127.0.0.1:3000/workspace/"
     });
     for (const origin of ["https://jumpserver.test", "https://other.test/prefix/", "http://localhost:8888"]) {
       session.origin = origin;
@@ -77,7 +77,7 @@ for (const method of ["apiRequest", "apiStreamRequest"]) {
   test(`${method}: invalid Kael overrides fail before sending credentials`, async () => {
     for (const url of ["file:///tmp/kael", "https://user:password@kael.test", "invalid-url"]) {
       const { auth, requests } = setup({ JMS_KAEL_DESKTOP_URL: url });
-      await assert.rejects(auth[method](request), /Kael endpoint|Invalid URL/);
+      await assert.rejects(auth[method](request), /AI service endpoint|Invalid URL/);
       assert.equal(requests.length, 0);
     }
   });

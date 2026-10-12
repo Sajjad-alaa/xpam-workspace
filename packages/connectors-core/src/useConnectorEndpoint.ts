@@ -3,11 +3,11 @@ import type { ConnectorSessionContext } from "./types/session";
 import { buildWsQueryParams, toWsOrigin } from "./utils/wsQuery";
 
 const WS_PREFIX: Record<JmsComponent, string> = {
-  koko: "/koko/ws/",
-  chen: "/chen/ws/",
-  lion: "/koko/lion/ws/",
-  tinker: "/koko/lion/ws/",
-  default: "/koko/ws/"
+  koko: "/secureconnection/ws/",
+  chen: "/webconnector/ws/",
+  lion: "/secureconnection/desktop/ws/",
+  tinker: "/secureconnection/desktop/ws/",
+  default: "/secureconnection/ws/"
 };
 
 export interface ConnectorEndpoint {
@@ -67,7 +67,7 @@ export function resolveWsUrl(component: JmsComponent, wsRoute: string, ctx: Conn
   const type = ctx.wsQuery?.type;
   if ((component === "koko" || component === "lion") && (type === "monitor" || type === "share")) {
     if (type === "share") params.set("component", component);
-    return `${wsBase}/koko/ws/${type}/?${params.toString()}`;
+    return `${wsBase}/secureconnection/ws/${type}/?${params.toString()}`;
   }
   return `${wsBase}${WS_PREFIX[component]}${wsRoute}/?${params.toString()}`;
 }

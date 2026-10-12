@@ -120,11 +120,11 @@ describe("API request headers", () => {
     vi.stubGlobal("getWebApiMutationHeaders", getWebApiMutationHeaders);
     vi.stubGlobal("fetch", fetch);
 
-    await apiRequest<void>({ method: "DELETE", path: "/kael/api/v1/conversations/conversation-1" });
+    await apiRequest<void>({ method: "DELETE", path: "/ai/api/v1/conversations/conversation-1" });
 
     expect(getWebApiMutationHeaders).toHaveBeenCalledOnce();
     expect(fetch).toHaveBeenCalledWith(
-      "/kael/api/v1/conversations/conversation-1",
+      "/ai/api/v1/conversations/conversation-1",
       expect.objectContaining({
         method: "DELETE",
         headers: expect.objectContaining({ "X-CSRFToken": "csrf-token" })

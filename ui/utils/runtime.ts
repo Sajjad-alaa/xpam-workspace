@@ -89,7 +89,7 @@ const normalizeBasePath = (path = "/") => {
   return normalizedPath;
 };
 
-const joinPrefixedPath = (basePath: string, targetPath: string) => {
+export const joinPrefixedPath = (basePath: string, targetPath: string) => {
   if (!targetPath) return normalizeBasePath(basePath);
   if (isAbsoluteUrl(targetPath)) return targetPath;
 

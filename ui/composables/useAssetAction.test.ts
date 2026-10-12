@@ -699,7 +699,7 @@ describe("opening assets in local applications", () => {
       expect(desktop ? mocks.invoke : mocks.assign).toHaveBeenCalledOnce();
       expect(endpoint).not.toHaveBeenCalled();
     } else {
-      expect(ready.mock.calls[0]?.[0].webUrl).toContain("/workspace/lion/connect?token=id");
+      expect(ready.mock.calls[0]?.[0].webUrl).toContain("/workspace/desktop/connect?token=id");
       const tab = { protocol: "http", payload: ready.mock.calls[0]![0] } as WorkspaceSessionTab;
       expect(resolveSessionComponent(tab)).toBe("lion");
       expect(resolveSessionSurface(tab)).toBe(
@@ -727,7 +727,7 @@ describe("opening assets in local applications", () => {
     const { ready, failed } = await connect("pgadmin", "postgresql");
     expect(failed).not.toHaveBeenCalled();
     const payload = ready.mock.calls[0]![0];
-    expect(payload.webUrl).toBe(`${endpointUrl}${prefix}/workspace/lion/connect?token=id`);
+    expect(payload.webUrl).toBe(`${endpointUrl}${prefix}/workspace/desktop/connect?token=id`);
     expect(resolveSessionComponent({ protocol: "postgresql", payload } as WorkspaceSessionTab)).toBe("lion");
     expect(mocks.createToken).toHaveBeenCalledWith(
       expect.objectContaining({ protocol: "postgresql", connect_method: "pgadmin" }),
@@ -752,7 +752,7 @@ describe("opening assets in local applications", () => {
       expect(mocks.invoke).toHaveBeenCalledExactlyOnceWith("pull_up", { url: `jms2://${encoded}` });
       expect(endpoint).not.toHaveBeenCalled();
     } else {
-      expect(ready.mock.calls[0]?.[0].webUrl).toBe("https://connector.example/workspace/lion/connect?token=id");
+      expect(ready.mock.calls[0]?.[0].webUrl).toBe("https://connector.example/workspace/desktop/connect?token=id");
       expect(mocks.invoke).not.toHaveBeenCalled();
       expect(mocks.getLocalClientUrl).not.toHaveBeenCalled();
     }

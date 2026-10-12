@@ -25,12 +25,12 @@ export function parseTableMetadata(value: unknown): ChenTableMetadata {
     !Array.isArray(value.constraints) ||
     !isNullableString(value.ddl)
   ) {
-    throw new Error("Chen returned malformed table metadata");
+    throw new Error("WebConnector returned malformed table metadata");
   }
   const capabilities = value.capabilities;
   const capabilityKeys = ["columns", "primaryKey", "foreignKeys", "indexes", "constraints", "ddl"] as const;
   if (!isRecord(capabilities) || capabilityKeys.some((key) => typeof capabilities[key] !== "boolean")) {
-    throw new Error("Chen returned malformed table metadata");
+    throw new Error("WebConnector returned malformed table metadata");
   }
   const primaryKey = value.primaryKey;
   if (
@@ -39,7 +39,7 @@ export function parseTableMetadata(value: unknown): ChenTableMetadata {
       !Array.isArray(primaryKey.columns) ||
       primaryKey.columns.some((column) => typeof column !== "string"))
   ) {
-    throw new Error("Chen returned malformed table metadata");
+    throw new Error("WebConnector returned malformed table metadata");
   }
   return {
     catalog: value.catalog,
@@ -70,7 +70,7 @@ function parseTableColumn(value: unknown): ChenTableMetadataColumn {
     !isNullableString(value.defaultValue) ||
     !isNullableString(value.comment)
   ) {
-    throw new Error("Chen returned malformed table metadata");
+    throw new Error("WebConnector returned malformed table metadata");
   }
   return value as unknown as ChenTableMetadataColumn;
 }
@@ -85,7 +85,7 @@ function parseTableForeignKey(value: unknown): ChenTableForeignKey {
     typeof value.referencedTable !== "string" ||
     !isStringArray(value.referencedColumns)
   ) {
-    throw new Error("Chen returned malformed table metadata");
+    throw new Error("WebConnector returned malformed table metadata");
   }
   return value as unknown as ChenTableForeignKey;
 }
@@ -108,7 +108,7 @@ function parseTableIndex(value: unknown): ChenTableIndex {
         typeof part.included !== "boolean"
     )
   ) {
-    throw new Error("Chen returned malformed table metadata");
+    throw new Error("WebConnector returned malformed table metadata");
   }
   return value as unknown as ChenTableIndex;
 }
@@ -125,7 +125,7 @@ function parseTableConstraint(value: unknown): ChenTableConstraint {
     !isStringArray(value.referencedColumns) ||
     !isNullableString(value.definition)
   ) {
-    throw new Error("Chen returned malformed table metadata");
+    throw new Error("WebConnector returned malformed table metadata");
   }
   return value as unknown as ChenTableConstraint;
 }

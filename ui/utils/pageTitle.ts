@@ -22,5 +22,5 @@ export function resolveWorkspaceFavicon(settings: WorkspaceTitleSettings | null 
 }
 
 export function formatWorkspaceTitle(brand: string, workspaceLabel: string) {
-  return `Luna - ${brand} ${workspaceLabel}`;
+  return `${brand} ${workspaceLabel}`;
 }

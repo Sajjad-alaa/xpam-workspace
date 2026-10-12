@@ -15,7 +15,7 @@ export async function uploadChenSqlFile(
     body
   });
   const result = await readJson<{ path?: string }>(response);
-  if (!result.path?.trim()) throw new Error("Chen upload returned no SQL file path");
+  if (!result.path?.trim()) throw new Error("WebConnector upload returned no SQL file path");
   return { path: result.path };
 }
 
@@ -65,7 +65,7 @@ export async function fetchChenExport(
 
   if (!response.ok) {
     const message = await response.text();
-    throw new Error(message || `Chen export failed (${response.status})`);
+    throw new Error(message || `WebConnector export failed (${response.status})`);
   }
 
   const responseFileName = contentDispositionFileName(response.headers.get("Content-Disposition"));

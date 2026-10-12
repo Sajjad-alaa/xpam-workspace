@@ -235,7 +235,7 @@ export function configureKokoThemeAdapter(adapter: KokoThemeAdapter) {
 }
 
 export function getKokoThemeAdapter() {
-  if (!kokoThemeAdapter) throw new Error("Koko theme adapter not configured");
+  if (!kokoThemeAdapter) throw new Error("SecureConnection theme adapter not configured");
   return kokoThemeAdapter;
 }
 

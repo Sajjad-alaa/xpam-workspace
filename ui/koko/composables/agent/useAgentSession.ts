@@ -916,7 +916,7 @@ export function useAgentSession(options: AgentSessionOptions): AgentSessionContr
         stableJson(created.payload?.context || {}) !== stableJson(manifest.context || {}) ||
         stableJson(created.payload?.tools) !== stableJson(manifest.tools)
       ) {
-        throw new AgentSessionManifestMismatchError("Existing Agent session does not match the Koko manifest");
+        throw new AgentSessionManifestMismatchError("Existing Agent session does not match the SecureConnection manifest");
       }
       resetHistoryPresentation();
     }

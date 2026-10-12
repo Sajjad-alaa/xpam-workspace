@@ -65,7 +65,7 @@ onMounted(() => {
       });
     }
 
-    const url = `${request.baseUrl.replace(/\/+$/, "")}/koko/api/connect-ticket/`;
+    const url = `${request.baseUrl.replace(/\/+$/, "")}/secureconnection/api/connect-ticket/`;
     const response = await fetch(url, {
       method: "POST",
       credentials: "include",

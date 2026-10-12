@@ -10,7 +10,7 @@ describe("connector endpoint resolution", () => {
       wsQuery: { type: "share", target_id: "share", code: "1234" }
     });
     expect(url).toBe(
-      `wss://jumpserver.example/koko/ws/share/?type=share&target_id=share&code=1234&component=${component}`
+      `wss://jumpserver.example/secureconnection/ws/share/?type=share&target_id=share&code=1234&component=${component}`
     );
   });
 

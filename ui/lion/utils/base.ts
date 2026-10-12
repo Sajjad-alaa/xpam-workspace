@@ -1,4 +1,5 @@
-const LION_SEGMENT = "/lion";
+// XPAM: page segment of the remote desktop pages (/workspace/desktop/...)
+const LION_SEGMENT = "/desktop";
 const LION_MARKER = `${LION_SEGMENT}/`;
 const ABSOLUTE_URL_PATTERN = /^(?:[a-z][a-z\d+\-.]*:)?\/\//i;
 
@@ -38,7 +39,7 @@ const resolveRuntimeBase = () => {
   return {
     prefix,
     // Lion 服务由 Koko 承载，API/WS 使用站点根路径，不带 Luna 页面前缀。
-    lionBase: "/koko/lion/"
+    lionBase: "/secureconnection/desktop/"
   };
 };
 

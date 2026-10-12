@@ -36,7 +36,7 @@ function normalizeTargetUrl(asset: AssetItem, protocol: string) {
 function normalizeProxyUrl(endpointUrl: string) {
   const url = new URL(endpointUrl);
   if (url.protocol !== "http:" || !url.hostname || url.username || url.password) {
-    throw new Error("Koko Web Proxy 地址必须是不含凭据的 HTTP URL");
+    throw new Error("SecureConnection web proxy 地址必须是不含凭据的 HTTP URL");
   }
   return url.origin;
 }

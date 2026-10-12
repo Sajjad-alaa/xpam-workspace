@@ -18,7 +18,7 @@ async function fetchWithTimeout(proxyUrl, path, options, timeout = 15_000) {
 }
 
 function required(value, field) {
-  if (typeof value !== "string" || !value) throw new Error(`Koko 返回的${field}为空`);
+  if (typeof value !== "string" || !value) throw new Error(`SecureConnection 返回的${field}为空`);
   return value;
 }
 
@@ -145,10 +145,10 @@ export async function createCredentialSession(
   const responseTarget = parseUrl(data.target_url);
   const targetOrigin = normalizedWebOrigin(targetUrl);
   if (normalizedWebOrigin(responseTarget) !== targetOrigin || String(data.origin).toLowerCase() !== targetOrigin) {
-    throw new Error("Koko 返回的 Website origin 不匹配");
+    throw new Error("SecureConnection 返回的 Website origin 不匹配");
   }
   const sessionId = required(data.session_id, "Web 会话 ID");
-  if (data.proxy_auth !== "connect_ticket") throw new Error("Koko 未启用 connect ticket 代理认证，请同步更新 Koko");
+  if (data.proxy_auth !== "connect_ticket") throw new Error("SecureConnection 未启用 connect ticket 代理认证，请同步更新 SecureConnection");
   const proxyAuth = { username: sessionId, password: ticket };
   const mode = data.autofill === "script" ? "script" : "basic";
   const steps = mode === "script" ? validateWebScript(data.script, targetOrigin) : null;
@@ -179,7 +179,7 @@ export async function createCredentialSession(
     serverPublicKey.length !== X25519_SPKI_PREFIX.length + 32 ||
     !serverPublicKey.subarray(0, X25519_SPKI_PREFIX.length).equals(X25519_SPKI_PREFIX)
   ) {
-    throw new Error("Koko Web 公钥格式无效");
+    throw new Error("SecureConnection web 公钥格式无效");
   }
 
   return {

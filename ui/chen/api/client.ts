@@ -5,7 +5,7 @@ export const buildHeaders = (token?: string, init?: HeadersInit) => ({
 });
 
 export function chenPath(path: string, endpointUrl?: string) {
-  const connectorPath = `/chen${path.startsWith("/") ? path : `/${path}`}`;
+  const connectorPath = `/webconnector${path.startsWith("/") ? path : `/${path}`}`;
   const currentOrigin = typeof window === "undefined" ? "http://localhost" : window.location.origin;
   const endpoint = new URL(endpointUrl || currentOrigin, currentOrigin);
 

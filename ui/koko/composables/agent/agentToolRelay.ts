@@ -258,13 +258,13 @@ export class AgentToolRelay {
 
     if (this.completed.has(toolCallId) || this.responding.has(toolCallId)) return null;
     const pendingCall = this.pendingCalls.get(toolCallId);
-    if (!pendingCall?.runId) throw new Error("Koko MCP response does not match an active agent run");
+    if (!pendingCall?.runId) throw new Error("SecureConnection MCP response does not match an active agent run");
     const sequence = data.seq ?? pendingCall.sequence + 1;
     if (sequence <= pendingCall.sequence) return null;
     const progress = frame.type === "mcp.progress";
     const hasResult = data.result !== undefined;
     const hasError = data.error !== undefined;
-    if (hasResult === hasError) throw new Error("Koko MCP response must contain exactly one result or error");
+    if (hasResult === hasError) throw new Error("SecureConnection MCP response must contain exactly one result or error");
     const normalized = progress
       ? { status: "running" as const, result: data.result }
       : hasError

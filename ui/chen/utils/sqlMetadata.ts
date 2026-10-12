@@ -81,7 +81,7 @@ export class ChenSqlMetadataStore {
         const byIdentity = new Map(items.map((item) => [relationIdentity(item.relation), item]));
         for (const relation of missing) {
           if (!byIdentity.has(relationIdentity(relation))) {
-            throw new Error(`Chen metadata response omitted ${relation.schema}.${relation.name}`);
+            throw new Error(`WebConnector metadata response omitted ${relation.schema}.${relation.name}`);
           }
         }
         return byIdentity;

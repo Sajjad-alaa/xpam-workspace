@@ -180,7 +180,7 @@ async function installSftpBackend(page: Page): Promise<MockSftpServer> {
     } else if (pathname === "/api/v1/assets/favorite-assets/") {
       body = [];
     } else if (pathname === "/api/v1/terminal/endpoints/smart/") {
-      body = { value: page.url().split("/luna/")[0] };
+      body = { value: page.url().split("/workspace/")[0] };
     } else if (pathname === "/api/v1/terminal/components/connect-methods/") {
       body = {
         sftp: [
@@ -207,7 +207,7 @@ async function installSftpBackend(page: Page): Promise<MockSftpServer> {
     await route.fulfill({ status: 200, contentType: "application/json", body: JSON.stringify(body) });
   });
 
-  await page.route("**/koko/api/connect-ticket/", (route) =>
+  await page.route("**/secureconnection/api/connect-ticket/", (route) =>
     route.fulfill({
       status: 200,
       contentType: "application/json",
@@ -215,7 +215,7 @@ async function installSftpBackend(page: Page): Promise<MockSftpServer> {
     })
   );
 
-  await page.routeWebSocket("**/koko/ws/sftp/**", (socket: WebSocketRoute) => {
+  await page.routeWebSocket("**/secureconnection/ws/sftp/**", (socket: WebSocketRoute) => {
     server.websocketUrls.push(socket.url());
 
     socket.onMessage((raw) => {
@@ -395,7 +395,7 @@ test.describe("koko SFTP workbench", () => {
       connect_method: "web_sftp"
     });
     expect(server.websocketUrls).toHaveLength(1);
-    expect(server.websocketUrls[0]).toContain("/koko/ws/sftp/?token=sftp-token&ticket=sftp-ticket");
+    expect(server.websocketUrls[0]).toContain("/secureconnection/ws/sftp/?token=sftp-token&ticket=sftp-ticket");
 
     await expect(table.getByText(".env", { exact: true })).toHaveCount(0);
 

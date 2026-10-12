@@ -464,7 +464,7 @@ export function createWebProxyManager({
     if (webProxyViews.has(label)) throw new Error("Web Proxy view label already exists");
     const target = parseWebProxyUrl(args.targetUrl, ["http:", "https:"], "Website URL");
     const canNavigate = webProxyNavigationPolicy(target, args.allowedUrls);
-    const proxy = direct ? null : parseWebProxyUrl(args.proxyUrl, ["http:"], "Koko Web Proxy URL");
+    const proxy = direct ? null : parseWebProxyUrl(args.proxyUrl, ["http:"], "SecureConnection web proxy URL");
     if (args.safeMode !== undefined && typeof args.safeMode !== "boolean")
       throw new Error("invalid Web Proxy safe mode");
     const safeMode = args.safeMode === true;
@@ -693,7 +693,7 @@ export function createWebProxyManager({
           )
     )
       .then(async (session) => {
-        if (proxy && !session?.proxyAuth) throw new Error("Koko 未返回代理认证凭据，请同步更新 Koko");
+        if (proxy && !session?.proxyAuth) throw new Error("SecureConnection 未返回代理认证凭据，请同步更新 SecureConnection");
         if (!managed.autofillPending || view.webContents.isDestroyed() || webProxyViews.get(label) !== managed) {
           if (proxy && session?.proxyAuth) await closeWebProxySession(proxy, session.sessionId, session.proxyAuth);
           return;
@@ -885,14 +885,14 @@ export function createWebProxyManager({
         throw new Error("当前 Website 标签已在录像");
       }
       const target = parseWebProxyUrl(args.targetUrl, ["http:", "https:"], "Website URL");
-      const proxy = parseWebProxyUrl(args.proxyUrl, ["http:"], "Koko Web Proxy URL");
+      const proxy = parseWebProxyUrl(args.proxyUrl, ["http:"], "SecureConnection web proxy URL");
       if (target.toString() !== managed.targetUrl || proxy.toString() !== managed.proxyUrl) {
         throw new Error("Web 录像参数与当前 Website 会话不匹配");
       }
       try {
         const webSession = await managed.webSessionPromise;
         if (!webSession?.sessionId) {
-          throw managed.webSessionError || new Error("Koko Web 会话尚未建立");
+          throw managed.webSessionError || new Error("SecureConnection web 会话尚未建立");
         }
         if (webProxyViews.get(managed.label) !== managed) return;
         if (requireRecording && managed.recording) {

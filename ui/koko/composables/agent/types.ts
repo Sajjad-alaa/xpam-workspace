@@ -1,6 +1,6 @@
 export const AGENT_PROTOCOL_VERSION = 1 as const;
 export const AGENT_CAPABILITY_VERSION = 1 as const;
-export const KAEL_API_ROOT = "/kael/api/v1";
+export const KAEL_API_ROOT = "/ai/api/v1";
 export const AGENT_SESSIONS_ROOT = `${KAEL_API_ROOT}/panel-sessions/`;
 export const AGENT_MCP_BINDING_META_KEY = "com.jumpserver/agent";
 export const MCP_PROTOCOL_VERSION_META_KEY = "io.modelcontextprotocol/protocolVersion";

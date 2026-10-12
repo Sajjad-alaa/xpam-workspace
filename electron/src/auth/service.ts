@@ -41,7 +41,7 @@ function requestSite(session, request) {
   if (configured) {
     const parsed = parseUrl(configured);
     if (!["http:", "https:"].includes(parsed.protocol) || !parsed.hostname || parsed.username || parsed.password) {
-      throw new Error("Kael endpoint must be an HTTP/HTTPS URL without embedded credentials");
+      throw new Error("AI service endpoint must be an HTTP/HTTPS URL without embedded credentials");
     }
     return configured.replace(/\/+$/, "");
   }
@@ -505,10 +505,10 @@ export class DesktopAuthService {
 
     const base = parseUrl(baseUrl);
     if (!["http:", "https:"].includes(base.protocol) || !base.hostname || base.username || base.password) {
-      throw new Error("Koko endpoint must be an HTTP/HTTPS URL without embedded credentials");
+      throw new Error("SecureConnection endpoint must be an HTTP/HTTPS URL without embedded credentials");
     }
 
-    const url = new URL("koko/api/connect-ticket/", `${base.toString().replace(/\/+$/, "")}/`);
+    const url = new URL("secureconnection/api/connect-ticket/", `${base.toString().replace(/\/+$/, "")}/`);
     const response = await this.fetchSite(url.toString(), {
       method: "POST",
       headers: {
