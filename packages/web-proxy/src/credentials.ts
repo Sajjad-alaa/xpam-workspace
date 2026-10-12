@@ -18,7 +18,7 @@ async function fetchWithTimeout(proxyUrl, path, options, timeout = 15_000) {
 }
 
 function required(value, field) {
-  if (typeof value !== "string" || !value) throw new Error(`SecureConnection 返回的${field}为空`);
+  if (typeof value !== "string" || !value) throw new Error(`SecureConnection returned an empty ${field}`);
   return value;
 }
 
@@ -30,7 +30,7 @@ async function responseError(response, action) {
 export function normalizedWebOrigin(value) {
   const url = value instanceof URL ? value : parseUrl(value);
   if (!["http:", "https:"].includes(url.protocol) || !url.hostname || url.username || url.password)
-    throw new Error("Website origin 无效");
+    throw new Error("Invalid website origin");
   return url.origin.toLowerCase();
 }
 
@@ -41,18 +41,18 @@ export function exactWebOrigin(value) {
     /[\s\\%*?#@\u0080-\uffff]/.test(value) ||
     !/^https?:\/\/[^/]+\/?$/i.test(value)
   )
-    throw new Error("脚本 origin 请填写完整的 HTTP/HTTPS origin，不支持路径或通配符");
+    throw new Error("Script origins must be full HTTP/HTTPS origins, without paths or wildcards");
   const url = parseUrl(value);
-  if (url.pathname !== "/" || url.hostname.endsWith(".") || url.port === "0") throw new Error("Website origin 无效");
+  if (url.pathname !== "/" || url.hostname.endsWith(".") || url.port === "0") throw new Error("Invalid website origin");
   return normalizedWebOrigin(value);
 }
 
 export function validateWebScript(value, origin) {
-  if (!Array.isArray(value) || !value.length || value.length > 128) throw new Error("登录脚本需要 1 至 128 个步骤");
+  if (!Array.isArray(value) || !value.length || value.length > 128) throw new Error("The sign-in script needs 1 to 128 steps");
   const steps = value
     .map((item) => {
       if (!item || typeof item !== "object" || !Number.isSafeInteger(item.step) || item.step < 1)
-        throw new Error("登录脚本步骤编号无效");
+        throw new Error("Invalid sign-in script step number");
       const step = {
         ...item,
         origin: item.origin ? exactWebOrigin(item.origin) : origin,
@@ -65,13 +65,13 @@ export function validateWebScript(value, origin) {
         typeof step.value !== "string" ||
         step.value.length > 4096
       )
-        throw new Error("登录脚本步骤内容无效");
+        throw new Error("Invalid sign-in script step content");
       if (step.timeout !== undefined && (!Number.isInteger(step.timeout) || step.timeout < 1 || step.timeout > 180))
-        throw new Error("步骤超时应为 1 至 180 秒");
+        throw new Error("Step timeout must be 1 to 180 seconds");
       if (step.optional !== undefined && (step.command !== "interactive" || typeof step.optional !== "boolean"))
-        throw new Error("optional 仅支持 interactive 步骤，且必须是布尔值");
+        throw new Error("optional is only supported on interactive steps and must be a boolean");
       if (/\{USERNAME\}|\{SECRET\}/.test(step.value) && step.command !== "type")
-        throw new Error(`第 ${step.step} 步不允许填写凭据`);
+        throw new Error(`Step ${step.step} may not fill credentials`);
       if (["type", "click", "button", "check", "code", "interactive", "success"].includes(step.command))
         validateWebSelector(step.target);
       else if (step.command === "open") {
@@ -80,8 +80,8 @@ export function validateWebScript(value, origin) {
         step.url = url.toString();
       } else if (step.command === "sleep") {
         const seconds = Number(step.target);
-        if (!/^\d+$/.test(step.target) || seconds < 0 || seconds > 30) throw new Error("脚本 sleep 应为 0 至 30 秒");
-      } else throw new Error(`Web Proxy 不支持脚本命令 ${step.command}，当前支持同一窗口内的主页面`);
+        if (!/^\d+$/.test(step.target) || seconds < 0 || seconds > 30) throw new Error("Script sleep must be 0 to 30 seconds");
+      } else throw new Error(`The web proxy does not support script command ${step.command}; only the main page in the same window is supported`);
       return step;
     })
     .sort((a, b) => a.step - b.step);
@@ -90,19 +90,19 @@ export function validateWebScript(value, origin) {
       (step, i) => (i > 0 && step.step === steps[i - 1].step) || (step.command === "success" && i !== steps.length - 1)
     )
   )
-    throw new Error("步骤编号不能重复，success 必须是最后一步");
+    throw new Error("Step numbers must be unique and success must be the last step");
   return steps;
 }
 
 export function validateWebSelector(selector) {
   if (typeof selector !== "string" || !selector || selector.length > 1024) {
-    throw new Error("Website 代填元素配置无效");
+    throw new Error("Invalid website autofill element configuration");
   }
   const separator = selector.indexOf("=");
   const kind = selector.slice(0, separator).trim().toLowerCase();
   const value = selector.slice(separator + 1).trim();
   if (separator < 1 || !value || !SUPPORTED_SELECTOR_KINDS.has(kind)) {
-    throw new Error("Website 代填元素配置无效");
+    throw new Error("Invalid website autofill element configuration");
   }
   return selector;
 }
@@ -116,7 +116,7 @@ export async function createCredentialSession(
   configuredInteractiveSelector = "",
   ticket = ""
 ) {
-  if (!tokenId || !tokenValue || !ticket) throw new Error("Web Proxy 连接缺少认证令牌");
+  if (!tokenId || !tokenValue || !ticket) throw new Error("The web proxy connection is missing its authentication token");
 
   const { privateKey, publicKey } = generateKeyPairSync("x25519");
   const endpoint = parseUrl(CREDENTIAL_PATH, proxyUrl);
@@ -132,23 +132,23 @@ export async function createCredentialSession(
       })
     });
   } catch (error) {
-    throw new Error(`创建 Web 代填会话失败: ${error}`);
+    throw new Error(`Creating the web autofill session failed: ${error}`);
   }
-  if (!response.ok) throw await responseError(response, "创建 Web 代填会话失败");
+  if (!response.ok) throw await responseError(response, "Creating the web autofill session failed");
 
   let data;
   try {
     data = await response.json();
   } catch (error) {
-    throw new Error(`解析 Web 代填会话失败: ${error}`);
+    throw new Error(`Parsing the web autofill session failed: ${error}`);
   }
   const responseTarget = parseUrl(data.target_url);
   const targetOrigin = normalizedWebOrigin(targetUrl);
   if (normalizedWebOrigin(responseTarget) !== targetOrigin || String(data.origin).toLowerCase() !== targetOrigin) {
-    throw new Error("SecureConnection 返回的 Website origin 不匹配");
+    throw new Error("The website origin returned by SecureConnection does not match");
   }
-  const sessionId = required(data.session_id, "Web 会话 ID");
-  if (data.proxy_auth !== "connect_ticket") throw new Error("SecureConnection 未启用 connect ticket 代理认证，请同步更新 SecureConnection");
+  const sessionId = required(data.session_id, "web session ID");
+  if (data.proxy_auth !== "connect_ticket") throw new Error("SecureConnection has not enabled connect-ticket proxy authentication; update SecureConnection");
   const proxyAuth = { username: sessionId, password: ticket };
   const mode = data.autofill === "script" ? "script" : "basic";
   const steps = mode === "script" ? validateWebScript(data.script, targetOrigin) : null;
@@ -166,28 +166,28 @@ export async function createCredentialSession(
   const usernameSelector = data.username_selector || "";
   if (usernameSelector) validateWebSelector(usernameSelector);
   const passwordSelector =
-    mode === "script" ? "" : validateWebSelector(required(data.password_selector, "密码元素配置"));
-  const submitSelector = mode === "script" ? "" : validateWebSelector(required(data.submit_selector, "提交元素配置"));
+    mode === "script" ? "" : validateWebSelector(required(data.password_selector, "password element configuration"));
+  const submitSelector = mode === "script" ? "" : validateWebSelector(required(data.submit_selector, "submit element configuration"));
   const successSelector = configuredSuccessSelector || data.success_selector || "";
   if (successSelector) validateWebSelector(successSelector);
   const interactiveSelector = configuredInteractiveSelector || data.interactive_selector || "";
   if (interactiveSelector) {
     validateWebSelector(interactiveSelector);
   }
-  const serverPublicKey = Buffer.from(required(data.server_public_key, "Web 公钥"), "base64");
+  const serverPublicKey = Buffer.from(required(data.server_public_key, "web public key"), "base64");
   if (
     serverPublicKey.length !== X25519_SPKI_PREFIX.length + 32 ||
     !serverPublicKey.subarray(0, X25519_SPKI_PREFIX.length).equals(X25519_SPKI_PREFIX)
   ) {
-    throw new Error("SecureConnection web 公钥格式无效");
+    throw new Error("Invalid SecureConnection web public key format");
   }
 
   return {
     sessionId,
     proxyAuth,
     autofillAvailable: true,
-    id: required(data.id, "代填会话 ID"),
-    accessToken: required(data.access_token, "代填访问令牌"),
+    id: required(data.id, "autofill session ID"),
+    accessToken: required(data.access_token, "autofill access token"),
     endpoint,
     origin: targetOrigin,
     mode,
@@ -210,7 +210,7 @@ export async function closeWebProxySession(proxyUrl, sessionId, proxyAuth) {
     method: "DELETE",
     proxyAuth
   });
-  if (!response.ok && response.status !== 407) throw await responseError(response, "关闭 Web 代理会话失败");
+  if (!response.ok && response.status !== 407) throw await responseError(response, "Closing the web proxy session failed");
 }
 
 export async function heartbeatWebProxySession(proxyUrl, sessionId, proxyAuth) {
@@ -218,12 +218,12 @@ export async function heartbeatWebProxySession(proxyUrl, sessionId, proxyAuth) {
     method: "POST",
     proxyAuth
   });
-  if (!response.ok) throw await responseError(response, "Web 代理会话心跳失败");
+  if (!response.ok) throw await responseError(response, "Web proxy session heartbeat failed");
 }
 
 export async function releaseCredentials(session, currentUrl) {
   const currentOrigin = normalizedWebOrigin(currentUrl);
-  if (!session.credentialOrigins.includes(currentOrigin)) throw new Error("当前页面与脚本指定的凭据填写域不匹配");
+  if (!session.credentialOrigins.includes(currentOrigin)) throw new Error("The current page does not match the credential origin set in the script");
   if (session.release) return session.release();
   const url = new URL(`${encodeURIComponent(session.id)}/credentials`, session.endpoint);
   const accessToken = session.accessToken;
@@ -239,19 +239,19 @@ export async function releaseCredentials(session, currentUrl) {
       body: JSON.stringify({ origin: currentOrigin })
     });
   } catch (error) {
-    throw new Error(`领取 Web 凭据失败: ${error}`);
+    throw new Error(`Claiming web credentials failed: ${error}`);
   }
-  if (!response.ok) throw await responseError(response, "领取 Web 凭据失败");
+  if (!response.ok) throw await responseError(response, "Claiming web credentials failed");
 
   let released;
   try {
     released = await response.json();
   } catch (error) {
-    throw new Error(`解析 Web 凭据失败: ${error}`);
+    throw new Error(`Parsing web credentials failed: ${error}`);
   }
   const nonce = Buffer.from(String(released.nonce || ""), "base64");
   const ciphertext = Buffer.from(String(released.ciphertext || ""), "base64");
-  if (nonce.length !== 12 || ciphertext.length <= 16) throw new Error("Web 凭据密文格式无效");
+  if (nonce.length !== 12 || ciphertext.length <= 16) throw new Error("Invalid web credential ciphertext format");
 
   const serverKey = createPublicKey({ key: session.serverPublicKey, type: "spki", format: "der" });
   const sharedSecret = diffieHellman({ privateKey: session.privateKey, publicKey: serverKey });
@@ -265,7 +265,7 @@ export async function releaseCredentials(session, currentUrl) {
   try {
     plaintext = Buffer.concat([decipher.update(ciphertext.subarray(0, tagOffset)), decipher.final()]);
   } catch {
-    throw new Error("Web 凭据校验失败");
+    throw new Error("Web credential verification failed");
   } finally {
     key.fill(0);
   }
@@ -276,7 +276,7 @@ export async function releaseCredentials(session, currentUrl) {
     }
     return credentials;
   } catch {
-    throw new Error("Web 凭据内容无效");
+    throw new Error("Invalid web credential content");
   } finally {
     plaintext.fill(0);
   }

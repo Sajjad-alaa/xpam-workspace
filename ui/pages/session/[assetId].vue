@@ -51,7 +51,7 @@ const closeAdminSession = async () => {
   else window.close();
 };
 
-useHead(() => ({ title: assetName.value || "JumpServer" }));
+useHead(() => ({ title: assetName.value || "XPAM" }));
 
 onMounted(() => {
   initialTheme();

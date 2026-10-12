@@ -46,6 +46,7 @@ import { productNameAllowsDevTools } from "../shared/product-name";
 import { parseUrl, toFetchUrl } from "../shared/url";
 import { createWebProxyManager } from "@jumpserver/web-proxy/manager";
 import { resolveExecutablePath } from "./executable-path";
+import { aboutDetails } from "./about";
 
 const electronDir = __dirname;
 const appRoot = app.getAppPath();
@@ -585,10 +586,6 @@ function createWindow(label = "main", options: CreateWindowOptions = {}) {
   return win;
 }
 
-function prefersZh() {
-  return (app.getLocale() || process.env.LANG || "").toLowerCase().startsWith("zh");
-}
-
 function preventCloseDuringTranscode(event, win, quit) {
   if (!replayTranscoder?.isTranscoding || allowCloseDuringTranscode) return;
   event.preventDefault();
@@ -598,14 +595,11 @@ function preventCloseDuringTranscode(event, win, quit) {
 function confirmCloseDuringTranscode(win, quit) {
   if (closeConfirmationPending) return;
   closeConfirmationPending = true;
-  const zh = prefersZh();
   const options = {
     type: "warning" as const,
-    title: zh ? "转码未完成" : "Transcoding in progress",
-    message: zh
-      ? "关闭窗口会中断正在进行的转码。确定关闭？"
-      : "Closing the window will interrupt active transcoding. Close anyway?",
-    buttons: zh ? ["取消", "关闭窗口"] : ["Cancel", "Close Window"],
+    title: "Transcoding in progress",
+    message: "Closing the window will interrupt active transcoding. Close anyway?",
+    buttons: ["Cancel", "Close Window"],
     defaultId: 0,
     cancelId: 0,
     noLink: true
@@ -630,43 +624,6 @@ function confirmCloseDuringTranscode(win, quit) {
 
 function menuLabels() {
   const appName = productName;
-  if (prefersZh()) {
-    return {
-      about: `关于 ${appName}`,
-      settings: "设置…",
-      tools: "我的工具",
-      file: "文件",
-      edit: "编辑",
-      view: "视图",
-      window: "窗口",
-      help: "帮助",
-      undo: "撤销",
-      redo: "重做",
-      cut: "剪切",
-      copy: "复制",
-      paste: "粘贴",
-      selectAll: "全选",
-      newLocalShell: "新建本地终端",
-      focusMode: "纯净模式",
-      leftPanel: "左侧面板",
-      rightPanel: "右侧面板",
-      statusBar: "底部状态栏",
-      batchCommand: "批量命令",
-      close: "关闭窗口",
-      minimize: "最小化窗口",
-      zoom: "缩放",
-      fullscreen: "进入全屏幕",
-      hide: `隐藏 ${appName}`,
-      hideOthers: "隐藏其他窗口",
-      showAll: "显示所有窗口",
-      showMain: "显示主窗口",
-      searchConnect: "搜索并连接…",
-      recentConnections: "最近连接",
-      noRecentConnections: "暂无最近连接",
-      quit: "退出"
-    };
-  }
-
   return {
     about: `About ${appName}`,
     settings: "Settings…",
@@ -722,26 +679,34 @@ function openSettingsWindow() {
   }
 }
 
-function openAboutWindow() {
+async function openAboutWindow() {
   const label = "about-window";
+  const settings = authService ? await authService.getAboutSettings() : null;
+  const details = aboutDetails(settings, productName);
+  const appName = details.name;
+  const query = new URLSearchParams({
+    name: appName,
+    version: app.getVersion(),
+    serverVersion: details.serverVersion,
+    edition: details.edition,
+    company: details.company,
+    server: details.server,
+    logo: details.logo
+  });
   const existing = windows.get(label);
   if (existing && !existing.isDestroyed()) {
+    existing.setTitle(`About ${appName}`);
+    void existing.loadURL(rendererTarget(`/workspace/about.html?${query}`));
     existing.show();
     existing.focus();
     return existing;
   }
 
-  const appName = productName;
-  const query = new URLSearchParams({
-    name: appName,
-    version: app.getVersion(),
-    custom: appName === defaultProductName ? "0" : "1"
-  });
   const isMac = process.platform === "darwin";
   const win = new BrowserWindow({
-    title: prefersZh() ? `关于 ${appName}` : `About ${appName}`,
-    width: 320,
-    height: 300,
+    title: `About ${appName}`,
+    width: 340,
+    height: 380,
     show: false,
     resizable: false,
     minimizable: false,
@@ -1243,7 +1208,7 @@ async function handleInvoke(event, request) {
         (args.successSelector || args.interactiveSelector || args.allowedUrls?.length))
     ) {
       const settings = await authService.apiRequest({ method: "GET", path: "/api/v1/settings/public/" });
-      if (settings?.XPACK_LICENSE_IS_VALID !== true) throw new Error("此 Web 高级功能需要有效的企业版许可证");
+      if (settings?.XPACK_LICENSE_IS_VALID !== true) throw new Error("This advanced web feature requires a valid enterprise license");
     }
     return withIpcErrorLog(command, () => webProxyManager.invoke(command, event, win, args));
   }

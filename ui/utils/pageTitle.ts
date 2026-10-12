@@ -6,7 +6,7 @@ export interface WorkspaceTitleSettings {
   };
 }
 
-export const COMMUNITY_WORKSPACE_BRAND = "JumpServer";
+export const COMMUNITY_WORKSPACE_BRAND = "XPAM";
 export const WORKSPACE_BRAND_STATE_KEY = "web-workspace-brand";
 export const WORKSPACE_FAVICON_STATE_KEY = "web-workspace-favicon";
 

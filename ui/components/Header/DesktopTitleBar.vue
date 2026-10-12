@@ -9,7 +9,7 @@ const props = withDefaults(
   }>(),
   {
     showMenus: true,
-    title: "JumpServer"
+    title: "XPAM"
   }
 );
 

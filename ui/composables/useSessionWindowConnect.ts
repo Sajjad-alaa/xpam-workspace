@@ -212,7 +212,7 @@ export function useSessionWindowConnect() {
         : await fetchSessionAsset(assetId, orgId);
       asset.org_id = orgId || undefined;
       asset.savedConnection = saved || undefined;
-      assetName.value = asset.name || "JumpServer";
+      assetName.value = asset.name || "XPAM";
 
       const reusableSavedConnection = !admin && hasReusableSavedConnection(asset);
       const connection = { ...(saved || {}), ...(preference || {}), ...(routeConnection || {}) };

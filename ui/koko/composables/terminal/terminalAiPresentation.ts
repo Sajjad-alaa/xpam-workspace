@@ -88,7 +88,7 @@ const aclKeys: Record<string, TerminalAiMessageKey> = {
 
 const legacyPtyProgress = new Set([
   "command is running in the current pty; you can interact with it directly in the terminal…",
-  "命令正在当前 pty 中执行，可直接在终端交互…"
+  "The command is running in the current pty; you can interact with it in the terminal…"
 ]);
 
 function normalized(value: unknown) {

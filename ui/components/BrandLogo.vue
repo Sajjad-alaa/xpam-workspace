@@ -38,7 +38,7 @@ introPlayed.value = true;
 </script>
 
 <template>
-  <img v-if="customLogo" :src="customLogo" alt="JumpServer" class="object-contain" @error="customLogo = ''" />
+  <img v-if="customLogo" :src="customLogo" alt="XPAM" class="object-contain" @error="customLogo = ''" />
   <svg
     v-else
     class="brand-logo"
@@ -47,7 +47,7 @@ introPlayed.value = true;
     shape-rendering="geometricPrecision"
     fill="currentColor"
     role="img"
-    aria-label="JumpServer"
+    aria-label="XPAM"
     focusable="false"
   >
     <!-- Original inner paths; use the compact viewBox from ui/assets/logo.svg. -->

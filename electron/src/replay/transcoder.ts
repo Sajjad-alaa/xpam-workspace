@@ -135,7 +135,7 @@ export function extractReplayArchive(archivePath) {
     extractor.once("finish", () => {
       if (failed) return;
       if (!parts.length) {
-        return fail(new Error(hasCast ? "终端录像请用离线播放器" : "包里没有可转码的图形录像"));
+        return fail(new Error(hasCast ? "Use the offline player for terminal recordings" : "The package contains no graphical recordings to transcode"));
       }
       parts.sort((left, right) => left.index - right.index);
       resolve({ metadata, parts });

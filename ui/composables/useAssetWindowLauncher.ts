@@ -28,7 +28,7 @@ export const useAssetWindowLauncher = () => {
     const label = `asset-${asset.id}-${Date.now()}`;
     const win = await desktopWindow.open(label, {
       url,
-      title: asset.name || "JumpServer",
+      title: asset.name || "XPAM",
       width: 1440,
       height: 920,
       minWidth: 1080,

@@ -51,33 +51,74 @@
       margin: 4px 0 14px;
       border: 1px solid rgba(52, 211, 153, 0.22);
     }
-    .copyright {
+    .details {
+      margin: 6px auto 0;
+      width: 100%;
+      border-collapse: collapse;
       font-size: 13px;
+    }
+    .details td {
+      padding: 5px 0;
+      border-top: 1px solid rgba(255, 255, 255, 0.06);
+      vertical-align: top;
+    }
+    .details td:first-child {
       color: #8e929c;
-      line-height: 1.5;
-      margin: 0;
+      text-align: left;
+      padding-right: 12px;
+      white-space: nowrap;
+    }
+    .details td:last-child {
+      text-align: right;
+      word-break: break-word;
     }
   </style>
 </head>
 <body>
   <div class="card">
     <img src="/logo.png" alt="App logo" id="logo" />
-    <div class="name" id="name" data-default-name="JumpServer">JumpServer</div>
+    <div class="name" id="name">XPAM</div>
     <div class="version" id="version">Version</div>
+    <table class="details" id="details"></table>
   </div>
   <script>
+    // Values come from the client's main process (server public settings); rendered as text only.
     const params = new URLSearchParams(window.location.search);
-    const customName = (params.get('name') || '').trim();
-    const version = params.get('version') || '';
-    const logoEl = document.getElementById('logo');
-    const nameEl = document.getElementById('name');
-    const versionEl = document.getElementById('version');
-    const appName = customName || nameEl.dataset.defaultName || 'XPAM';
+    const value = (key) => (params.get(key) || '').trim();
+    const appName = value('name') || 'XPAM';
+    const serverVersion = value('serverVersion');
+    const clientVersion = value('version');
+    const withV = (v) => (v && !/^v/i.test(v) ? `v${v}` : v);
 
     document.title = `About ${appName}`;
+    const logoEl = document.getElementById('logo');
     logoEl.alt = appName;
-    versionEl.textContent = version ? `v${version}` : 'Version';
-    nameEl.textContent = appName;
+    const logo = value('logo');
+    if (/^https?:\/\//i.test(logo)) {
+      logoEl.onerror = () => { logoEl.onerror = null; logoEl.src = '/logo.png'; };
+      logoEl.src = logo;
+    }
+    document.getElementById('name').textContent = appName;
+    document.getElementById('version').textContent = withV(serverVersion || clientVersion) || 'Version';
+
+    const rows = [
+      ['Edition', value('edition')],
+      ['License company', value('company')],
+      ['Server', value('server')],
+      ['Client version', withV(clientVersion)]
+    ];
+    const table = document.getElementById('details');
+    for (const [label, text] of rows) {
+      if (!text) continue;
+      const row = table.insertRow();
+      row.insertCell().textContent = label;
+      row.insertCell().textContent = text;
+    }
+    if (!value('server')) {
+      const row = table.insertRow();
+      row.insertCell().textContent = 'Server';
+      row.insertCell().textContent = 'Not connected';
+    }
   </script>
 </body>
 </html>

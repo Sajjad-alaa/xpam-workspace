@@ -108,7 +108,7 @@ onMounted(async () => {
     if (typeof corporation === "string" && corporation.trim()) {
       licenseCompany.value = corporation.trim();
     } else if (hasLicense) {
-      licenseCompany.value = "JumpServer PAM";
+      licenseCompany.value = "XPAM";
     }
 
     logoSrc.value = resolveInterfaceLogo(settings.INTERFACE?.logo_logout || settings.INTERFACE?.logo_index);

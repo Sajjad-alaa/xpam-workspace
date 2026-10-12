@@ -80,14 +80,14 @@ test("rejects terminal-only archives with a useful message", () =>
       { name: "nested/session.json", data: JSON.stringify({ id: "session" }) }
     ]);
 
-    await assert.rejects(extractReplayArchive(archivePath), /终端录像请用离线播放器/);
+    await assert.rejects(extractReplayArchive(archivePath), /Use the offline player for terminal recordings/);
   }));
 
 test("rejects archives without graphical recordings", () =>
   withTemporaryRoot(async (root) => {
     const archivePath = await writeArchive(root, "session.tar", []);
 
-    await assert.rejects(extractReplayArchive(archivePath), /包里没有可转码的图形录像/);
+    await assert.rejects(extractReplayArchive(archivePath), /The package contains no graphical recordings to transcode/);
     assert.equal(replayTranscoderInternals.outputFilename({ id: "session", user: "user" }, "friendly"), "session.mp4");
   }));
 

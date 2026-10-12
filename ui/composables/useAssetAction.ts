@@ -742,7 +742,7 @@ export const useAssetAction = () => {
       }
       let webProxy;
       if (body.connect_method === WEB_PROXY_NATIVE_VALUE) {
-        if (!meta.asset) throw new Error("Website 资产信息不完整");
+        if (!meta.asset) throw new Error("Website asset information is incomplete");
         const assetDetail = await getAssetDetailRequest(meta.assetId, meta.orgId);
         const successSelector = String(assetDetail.spec_info?.success_selector || "").trim();
         webProxy = useWebProxyManager().buildWebProxyRequest(
@@ -760,7 +760,7 @@ export const useAssetAction = () => {
           baseUrl: ticketEndpoint,
           tokenId: token.id
         });
-        if (!ticket) throw new Error("SecureConnection 未返回 Web Proxy connect ticket");
+        if (!ticket) throw new Error("SecureConnection did not return a web proxy connect ticket");
         const settings = await getPublicSettings();
         webProxy = {
           ...webProxy,

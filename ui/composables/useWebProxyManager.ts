@@ -18,7 +18,7 @@ function normalizeTargetUrl(asset: AssetItem, protocol: string) {
   const value = /^[a-z][a-z\d+.-]*:\/\//i.test(raw) ? raw : `${protocol}://${raw}`;
   const url = new URL(value);
   if (!["http:", "https:"].includes(url.protocol) || !url.hostname || url.username || url.password) {
-    throw new Error("Website 资产地址不是有效的 HTTP/HTTPS URL");
+    throw new Error("The website asset address is not a valid HTTP/HTTPS URL");
   }
 
   const configuredPort = asset.permedProtocols?.find((item) => item.name === protocol)?.port;
@@ -36,7 +36,7 @@ function normalizeTargetUrl(asset: AssetItem, protocol: string) {
 function normalizeProxyUrl(endpointUrl: string) {
   const url = new URL(endpointUrl);
   if (url.protocol !== "http:" || !url.hostname || url.username || url.password) {
-    throw new Error("SecureConnection web proxy 地址必须是不含凭据的 HTTP URL");
+    throw new Error("The SecureConnection web proxy address must be an HTTP URL without credentials");
   }
   return url.origin;
 }

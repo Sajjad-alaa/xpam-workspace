@@ -186,8 +186,8 @@ export class DesktopAuthService {
       response.writeHead(accepted ? 200 : 400, { "Content-Type": "text/html; charset=utf-8" });
       response.end(
         accepted
-          ? "<!doctype html><meta charset=utf-8><title>JumpServer</title><p>登录完成，可以关闭此窗口。</p>"
-          : "<!doctype html><meta charset=utf-8><title>JumpServer</title><p>登录回调已失效，请返回客户端重试。</p>"
+          ? "<!doctype html><meta charset=utf-8><title>XPAM</title><p>Sign-in complete. You can close this window.</p>"
+          : "<!doctype html><meta charset=utf-8><title>XPAM</title><p>The sign-in callback has expired. Return to the client and try again.</p>"
       );
     });
     this.callbackServer = server;
@@ -403,6 +403,30 @@ export class DesktopAuthService {
       security_command_execution: settings.SECURITY_COMMAND_EXECUTION === true,
       permission_orgs: permissionOrgs
     };
+  }
+
+  // XPAM: public settings of the connected server for the About window (product, version, license).
+  // Returns null when no server is selected or the request fails, so About still opens offline.
+  async getAboutSettings(): Promise<Record<string, any> | null> {
+    let session;
+    try {
+      session = this.currentSession();
+    } catch {
+      return null;
+    }
+    try {
+      const bearer = await this.freshToken(session.origin, session.sessionKey, session.bearerToken);
+      session.bearerToken = bearer;
+      const response = await this.requestApiResponse(session.origin, PUBLIC_SETTINGS, {
+        bearerToken: bearer,
+        timeout: 8_000
+      });
+      if (!response.success) return null;
+      const settings = typeof response.data === "string" ? JSON.parse(response.data) : response.data;
+      return settings && typeof settings === "object" ? { ...settings, __origin: session.origin } : null;
+    } catch {
+      return null;
+    }
   }
 
   async apiRequest(request) {

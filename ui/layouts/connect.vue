@@ -23,7 +23,7 @@ const macTrafficLightInset = computed(() => isMacOS.value && !nativeFullscreen.v
       data-desktop-drag-region
       class="flex h-8 min-h-8 items-center px-20 text-xs font-medium"
     >
-      <span class="truncate">JumpServer</span>
+      <span class="truncate">XPAM</span>
     </header>
     <WorkspaceTopHeader v-if="showSessionTabChrome && (!isDesktopRuntime() || isMacOS)" :show-actions="false">
       <div class="h-full" :class="macTrafficLightInset ? 'pl-20' : ''">

@@ -92,7 +92,7 @@ export class WebProxyScript {
 
   private assertRunning() {
     if (this.controller.signal.aborted) throw this.controller.signal.reason;
-    if (this.contents.isDestroyed()) throw new Error("Web Proxy 页面已关闭");
+    if (this.contents.isDestroyed()) throw new Error("The web proxy page is closed");
   }
 
   private async runCode(code) {
@@ -128,7 +128,7 @@ export class WebProxyScript {
   private async waitFor(step, read, optional = false) {
     const timeout = (step.timeout || 20) * 1000;
     const deadline = Date.now() + timeout;
-    const timedOut = new Error(`登录脚本第 ${step.step} 步（${step.command}）超时`);
+    const timedOut = new Error(`Sign-in script step ${step.step} (${step.command}) timed out`);
     const timer = setTimeout(() => this.cancel(timedOut), timeout);
     try {
       while (Date.now() < deadline) {
@@ -164,14 +164,14 @@ export class WebProxyScript {
     // Recheck after a potentially slow network release. Never deliver a value to
     // another document that happened to reuse the same field id.
     const currentDocument = await this.waitFor(step, () => this.runCode(probeScript(step)));
-    if (currentDocument !== documentId) throw new Error(`第 ${step.step} 步代填前页面已变化，请重新连接`);
+    if (currentDocument !== documentId) throw new Error(`The page changed before step ${step.step} was filled; please reconnect`);
     let value = step.value.replace(/\{USERNAME\}|\{SECRET\}/g, (key) =>
       key === "{USERNAME}" ? this.credentials?.username || "" : this.credentials?.password || ""
     );
     const navigation = this.navigation;
     try {
       const done = await this.runCode(actionScript(step, documentId, value));
-      if (!done) throw new Error(`第 ${step.step} 步执行前元素已变化，请重新连接`);
+      if (!done) throw new Error(`The element changed before step ${step.step} ran; please reconnect`);
     } catch (error) {
       this.assertRunning();
       // Navigation can destroy the reply after the input/click was delivered.
@@ -197,7 +197,7 @@ export class WebProxyScript {
         if (this.controller.signal.aborted || this.verificationDone || this.verificationReady) return;
         this.verificationReady = true;
         this.hooks.interaction(interaction, true);
-        this.hooks.state("interactive", `第 ${step.step} 步：请完成验证，然后继续脚本`);
+        this.hooks.state("interactive", `Step ${step.step}: complete the verification, then continue the script`);
       }
     );
     this.interaction = interaction;
@@ -205,7 +205,7 @@ export class WebProxyScript {
     try {
       const deadline = Date.now() + (step.timeout || 180) * 1000;
       while (!this.verificationDone) {
-        if (Date.now() >= deadline) throw new Error(`第 ${step.step} 步人工验证超时`);
+        if (Date.now() >= deadline) throw new Error(`Manual verification timed out at step ${step.step}`);
         await this.pause();
       }
     } finally {
@@ -236,7 +236,7 @@ export class WebProxyScript {
     }
   }
 
-  cancel(reason = new Error("登录脚本已结束")) {
+  cancel(reason = new Error("The sign-in script has ended")) {
     if (!this.controller.signal.aborted) this.controller.abort(reason);
     if (this.credentials) {
       this.credentials.username = "";
@@ -248,7 +248,7 @@ export class WebProxyScript {
   }
 
   async run() {
-    const timer = setTimeout(() => this.cancel(new Error("登录脚本总耗时超过 10 分钟")), 600_000);
+    const timer = setTimeout(() => this.cancel(new Error("The sign-in script took longer than 10 minutes in total")), 600_000);
     this.contents.on("did-start-navigation", this.navigated);
     try {
       const finalStep = this.session.steps.at(-1);
@@ -259,12 +259,12 @@ export class WebProxyScript {
       }
       for (const step of this.session.steps) {
         this.assertRunning();
-        this.hooks.state("filling", `正在执行登录脚本第 ${step.step} 步（${step.command}）`);
+        this.hooks.state("filling", `Running sign-in script step ${step.step} (${step.command})`);
         switch (step.command) {
           case "open":
             // Script URLs are validated as HTTP(S) before the runner starts.
             if (this.hooks.canNavigate && !this.hooks.canNavigate(step.url))
-              throw new Error("页面地址不在此资产的访问白名单中");
+              throw new Error("The page address is not on this asset's allowlist");
             await this.contents.loadURL(step.url);
             break;
           case "sleep":
@@ -287,7 +287,7 @@ export class WebProxyScript {
       }
       this.assertRunning();
       const cleaned = await this.runCode("globalThis.__jmsScriptCleanup?.() ?? true");
-      if (!cleaned) throw new Error("登录脚本完成后未能清理凭据");
+      if (!cleaned) throw new Error("Credentials could not be cleared after the sign-in script finished");
       return finalStep.command === "success" ? "success" : "submitted";
     } finally {
       clearTimeout(timer);
@@ -299,12 +299,12 @@ export class WebProxyScript {
 }
 
 export function webProxyNavigationPolicy(targetUrl, allowedUrls: unknown = []) {
-  if (!Array.isArray(allowedUrls) || allowedUrls.length > 100) throw new Error("Website 访问白名单最多支持 100 个站点");
+  if (!Array.isArray(allowedUrls) || allowedUrls.length > 100) throw new Error("The website allowlist supports at most 100 sites");
   let origins: Set<string>;
   try {
     origins = new Set(allowedUrls.map(exactWebOrigin));
   } catch {
-    throw new Error("Website 访问白名单请填写完整 HTTP/HTTPS 站点地址，不支持路径或通配符");
+    throw new Error("Website allowlist entries must be full HTTP/HTTPS site addresses, without paths or wildcards");
   }
   const restricted = origins.size > 0;
   origins.add(normalizedWebOrigin(targetUrl));
@@ -325,11 +325,11 @@ export function installWebProxyNavigationGuard(contents, blocked, canNavigate?) 
       normalizedWebOrigin(event.url);
       if (canNavigate && !canNavigate(event.url)) {
         event.preventDefault();
-        blocked("页面地址不在此资产的访问白名单中");
+        blocked("The page address is not on this asset's allowlist");
       }
     } catch {
       event.preventDefault();
-      blocked("页面跳转地址无效");
+      blocked("Invalid redirect address");
     }
   };
   contents.on("will-navigate", guard);

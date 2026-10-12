@@ -78,7 +78,7 @@ export default defineNuxtPlugin((nuxtApp) => {
           onSessionReady: (payload) => {
             const tokenId = String(payload.id || payload.token?.id || "");
             if (!tokenId) {
-              reject(new Error("服务端未返回 SFTP 连接令牌"));
+              reject(new Error("The server did not return an SFTP connection token"));
               return;
             }
             resolve({ tokenId });

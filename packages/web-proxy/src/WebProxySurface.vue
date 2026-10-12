@@ -43,7 +43,7 @@ const navigationError = ref("");
 const autofillStatus = ref<WebProxyAutofillState["status"]>();
 const autofillPending = ref(true);
 const autofillPreviewFrozen = ref(false);
-const autofillMessage = ref("正在建立安全登录会话");
+const autofillMessage = ref("Establishing a secure sign-in session");
 const preview = ref("");
 const interactivePending = ref(false);
 const interactiveCanComplete = ref(false);
@@ -69,7 +69,7 @@ const verificationCursor = computed(() =>
     : "default"
 );
 const verificationWaitingMessage = computed(() =>
-  actionPending.value || autofillStatus.value === "submitted" ? "正在登录…" : "正在加载验证区域…"
+  actionPending.value || autofillStatus.value === "submitted" ? "Signing in…" : "Loading the verification area…"
 );
 const verificationInputRef = ref<HTMLTextAreaElement>();
 let unlistenInteraction: (() => void) | undefined;
@@ -124,19 +124,19 @@ const safeMode = computed(() => request.value?.safeMode === true);
 const autofillLabel = computed(() => {
   switch (autofillStatus.value) {
     case "ready":
-      return "等待代填";
+      return "Waiting for autofill";
     case "filling":
-      return "安全登录中";
+      return "Secure sign-in in progress";
     case "interactive":
-      return "等待人工验证";
+      return "Waiting for manual verification";
     case "submitted":
-      return "已提交登录";
+      return "Sign-in submitted";
     case "success":
-      return "登录成功";
+      return "Signed in";
     case "unavailable":
-      return "未配置代填";
+      return "Autofill not configured";
     case "error":
-      return "代填失败";
+      return "Autofill failed";
     default:
       return "";
   }
@@ -144,15 +144,15 @@ const autofillLabel = computed(() => {
 const recordingLabel = computed(() => {
   switch (recordingStatus.value) {
     case "recording":
-      return "录像中";
+      return "Recording";
     case "paused":
-      return "录像暂停";
+      return "Recording paused";
     case "finishing":
-      return "正在生成录像";
+      return "Generating recording";
     case "finished":
-      return "录像已生成";
+      return "Recording generated";
     case "error":
-      return "录像失败";
+      return "Recording failed";
     default:
       return "";
   }
@@ -160,26 +160,26 @@ const recordingLabel = computed(() => {
 const statusSummary = computed(() =>
   props.browsable
     ? error.value
-      ? "连接异常"
+      ? "Connection error"
       : loading.value
-        ? "正在加载"
-        : "轻量浏览模式"
+        ? "Loading"
+        : "Lightweight browsing mode"
     : [
         error.value
-          ? "连接异常"
+          ? "Connection error"
           : !viewCreated.value || loading.value
-            ? "正在连接"
+            ? "Connecting"
             : request.value?.proxyUrl
-              ? "已通过代理连接"
-              : "已连接",
-        autofillStatus.value === "unavailable" ? "账号代填未配置" : `账号代填：${autofillLabel.value || "等待状态"}`,
+              ? "Connected through proxy"
+              : "Connected",
+        autofillStatus.value === "unavailable" ? "Account autofill not configured" : `Account autofill: ${autofillLabel.value || "waiting for status"}`,
         request.value?.recordingEnabled === false
           ? request.value?.proxyUrl
             ? request.value?.recordingSupported === false
               ? ""
-              : "录像未启用"
-            : "远程会话录像"
-          : recordingLabel.value || "录像准备中"
+              : "Recording not enabled"
+            : "Remote session recording"
+          : recordingLabel.value || "Preparing recording"
       ]
         .filter(Boolean)
         .join(" · ")
@@ -279,7 +279,7 @@ async function navigate() {
     target = new URL(/^https?:\/\//i.test(value) ? value : `https://${value}`);
     if (!target.hostname || target.username || target.password) throw new Error();
   } catch {
-    navigationError.value = "请输入有效的 HTTP/HTTPS 页面地址";
+    navigationError.value = "Enter a valid HTTP/HTTPS page address";
     return;
   }
   navigationError.value = "";
@@ -288,7 +288,7 @@ async function navigate() {
     await desktopWebProxy.navigate(viewLabel, target.toString());
   } catch (cause) {
     loading.value = false;
-    navigationError.value = `无法打开页面：${String(cause instanceof Error ? cause.message : cause)}`;
+    navigationError.value = `Cannot open the page: ${String(cause instanceof Error ? cause.message : cause)}`;
   }
 }
 
@@ -298,10 +298,10 @@ async function completeVerification() {
   verificationCompletionError.value = "";
   try {
     if (!(await desktopWebProxy.completeVerification(viewLabel))) {
-      verificationCompletionError.value = "暂时无法完成验证，请等待页面稳定后重试";
+      verificationCompletionError.value = "Verification cannot be completed right now; wait for the page to settle and try again";
     }
   } catch {
-    verificationCompletionError.value = "完成验证失败，请重试";
+    verificationCompletionError.value = "Completing verification failed; please try again";
   } finally {
     actionPending.value = false;
   }
@@ -347,7 +347,7 @@ async function startRecording() {
     });
   } catch {
     recordingStatus.value = "error";
-    if (props.recordingRequired) emit("fatal", "录像启动失败，请重新连接");
+    if (props.recordingRequired) emit("fatal", "Recording failed to start; please reconnect");
   }
 }
 
@@ -461,12 +461,12 @@ watch([() => props.colorScheme, viewCreated], async ([colorScheme, created]) => 
 
 onMounted(async () => {
   if (!props.supported) {
-    error.value = "内置浏览器仅在桌面客户端中可用";
+    error.value = "The built-in browser is only available in the desktop client";
     loading.value = false;
     return;
   }
   if (!request.value) {
-    error.value = "Web Proxy 会话参数不完整";
+    error.value = "Web proxy session parameters are incomplete";
     loading.value = false;
     return;
   }
@@ -502,7 +502,7 @@ onMounted(async () => {
   unlistenRecordingState = await desktopWebProxy.onRecordingState<WebProxyRecordingState>(({ payload }) => {
     if (payload.label !== viewLabel) return;
     recordingStatus.value = payload.status;
-    if (props.recordingRequired && payload.status === "error") emit("fatal", "录像中断，请重新连接");
+    if (props.recordingRequired && payload.status === "error") emit("fatal", "Recording interrupted; please reconnect");
   });
   if (disposed) {
     unlistenState?.();
@@ -584,7 +584,7 @@ defineExpose({ focus, close: closeView });
         variant="ghost"
         size="sm"
         :disabled="navigationDisabled"
-        aria-label="后退"
+        aria-label="Back"
         @click="history('back')"
       />
       <UButton
@@ -593,7 +593,7 @@ defineExpose({ focus, close: closeView });
         variant="ghost"
         size="sm"
         :disabled="navigationDisabled"
-        aria-label="前进"
+        aria-label="Forward"
         @click="history('forward')"
       />
       <UButton
@@ -603,7 +603,7 @@ defineExpose({ focus, close: closeView });
         size="sm"
         :loading="loading"
         :disabled="navigationDisabled"
-        aria-label="刷新"
+        aria-label="Refresh"
         @click="reload"
       />
       <form class="relative min-w-0 flex-1" @submit.prevent="navigate">
@@ -617,8 +617,8 @@ defineExpose({ focus, close: closeView });
           spellcheck="false"
           :disabled="navigationDisabled"
           :readonly="!props.browsable"
-          :aria-label="props.browsable ? '地址栏' : '地址栏只读'"
-          :title="props.browsable ? '输入地址并按 Enter 访问' : '当前不支持手动输入地址'"
+          :aria-label="props.browsable ? 'Address bar' : 'Address bar (read-only)'"
+          :title="props.browsable ? 'Enter an address and press Enter' : 'Manual address entry is not supported'"
         />
         <div
           v-if="autofillPending && !error"
@@ -627,16 +627,16 @@ defineExpose({ focus, close: closeView });
         >
           <UIcon name="i-lucide-loader-circle" class="size-4 shrink-0 animate-spin motion-reduce:animate-none" />
           <span role="status" class="min-w-0 flex-1 truncate">{{ autofillMessage }}</span>
-          <span class="shrink-0 tabular-nums">已等待 {{ waitingSeconds }} 秒</span>
+          <span class="shrink-0 tabular-nums">Waited {{ waitingSeconds }} s</span>
           <UButton
             v-if="interactiveCanComplete && !verificationCollapsed"
             size="xs"
             :loading="actionPending"
             @click="completeVerification"
           >
-            完成交互
+            Finish interaction
           </UButton>
-          <UButton v-if="verificationCollapsed" size="xs" @click="resumeVerification">继续验证</UButton>
+          <UButton v-if="verificationCollapsed" size="xs" @click="resumeVerification">Continue verification</UButton>
           <UButton
             v-if="interactivePending && !verificationCollapsed"
             color="neutral"
@@ -645,7 +645,7 @@ defineExpose({ focus, close: closeView });
             :disabled="actionPending"
             @click="collapseVerification"
           >
-            返回
+            Back
           </UButton>
         </div>
       </form>
@@ -661,7 +661,7 @@ defineExpose({ focus, close: closeView });
           variant="ghost"
           size="sm"
           class="size-7 shrink-0 cursor-help justify-center"
-          :aria-label="`会话状态：${statusSummary}`"
+          :aria-label="`Session status: ${statusSummary}`"
         />
       </UTooltip>
     </div>
@@ -701,7 +701,7 @@ defineExpose({ focus, close: closeView });
             class="size-7 text-muted"
             :class="{ 'animate-spin motion-reduce:animate-none': !error }"
           />
-          <p v-if="error" class="text-base font-medium">连接失败</p>
+          <p v-if="error" class="text-base font-medium">Connection failed</p>
           <p
             :role="error ? 'alert' : 'status'"
             aria-live="polite"
@@ -710,8 +710,8 @@ defineExpose({ focus, close: closeView });
           >
             {{ error || autofillMessage }}
           </p>
-          <p v-if="!error" class="text-xs text-muted">已等待 {{ waitingSeconds }} 秒</p>
-          <p v-if="preview && !error" class="text-xs text-muted">安全登录期间显示页面预览</p>
+          <p v-if="!error" class="text-xs text-muted">Waited {{ waitingSeconds }} s</p>
+          <p v-if="preview && !error" class="text-xs text-muted">Page preview shown during secure sign-in</p>
           <div class="flex items-center gap-2">
             <UButton
               v-if="error && request && props.reconnectable"
@@ -719,7 +719,7 @@ defineExpose({ focus, close: closeView });
               :loading="actionPending"
               @click="reconnect"
             >
-              重新连接
+              Reconnect
             </UButton>
           </div>
         </div>
@@ -727,7 +727,7 @@ defineExpose({ focus, close: closeView });
 
       <div v-if="verificationCollapsed && !error" class="absolute inset-0 grid place-items-center p-6 text-center">
         <p class="rounded-lg border border-default bg-default px-4 py-3 text-sm text-muted" role="status">
-          验证区域已收起，点击“继续验证”可恢复操作。
+          The verification area is collapsed; click “Continue verification” to resume.
         </p>
       </div>
       <div
@@ -743,7 +743,7 @@ defineExpose({ focus, close: closeView });
           :src="verificationFrame.image"
           :width="verificationFrame.width"
           :height="verificationFrame.height"
-          alt="目标网站的人工验证区域"
+          alt="Manual verification area of the target website"
           draggable="false"
           class="min-h-0 max-w-full touch-none select-none object-contain"
           :style="{ cursor: verificationCursor }"
@@ -764,7 +764,7 @@ defineExpose({ focus, close: closeView });
         <textarea
           ref="verificationInputRef"
           class="sr-only"
-          :aria-label="verificationFrame?.focusLabel || '人工验证键盘输入，按 Tab 选择验证控件，按 Escape 退出输入'"
+          :aria-label="verificationFrame?.focusLabel || 'Manual verification keyboard input: press Tab to choose a control, Escape to leave'"
           autocomplete="off"
           autocapitalize="off"
           :spellcheck="false"
@@ -783,7 +783,7 @@ defineExpose({ focus, close: closeView });
           class="flex items-center gap-2 rounded-xl border border-[var(--app-border)] bg-[var(--app-surface-overlay)] px-3 py-2 text-xs text-[var(--app-muted)] shadow-[var(--theme-shadow-soft)]"
         >
           <UIcon name="i-lucide-panels-top-left" class="size-4" />
-          <span>Web 会话暂时置于后台</span>
+          <span>Web session temporarily in the background</span>
         </div>
       </div>
     </div>
