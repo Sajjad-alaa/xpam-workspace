@@ -53,7 +53,7 @@ onMounted(() => {
         class="progress-label shrink-0 text-3xl font-semibold tracking-[0.08em]"
         :class="{ 'is-on': shownIndex >= 1 }"
       >
-        JumpServer
+        XPAM
       </span>
       <span class="progress-line">
         <span class="progress-line-fill progress-line-fill--late" :class="{ 'is-on': shownIndex >= 2 }" />
