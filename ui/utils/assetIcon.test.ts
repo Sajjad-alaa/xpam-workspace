@@ -3,8 +3,8 @@ import { resolveAssetIconFromCandidates, resolveAssetIconFromFields, resolveAsse
 
 describe("asset icon URLs", () => {
   it("uses the Nuxt app base URL for public icons", () => {
-    expect(resolveAssetIconSrc("linux", "/luna/")).toBe("/luna/icons/linux.svg");
-    expect(resolveAssetIconFromFields({ platform: "PostgreSQL" }, "/luna/").src).toBe("/luna/icons/postgre.svg");
+    expect(resolveAssetIconSrc("linux", "/workspace/")).toBe("/workspace/icons/linux.svg");
+    expect(resolveAssetIconFromFields({ platform: "PostgreSQL" }, "/workspace/").src).toBe("/workspace/icons/postgre.svg");
   });
 
   it("keeps root-hosted icon URLs unchanged", () => {
@@ -30,10 +30,10 @@ describe("asset icon URLs", () => {
     ["Kubernetes", "kubernetes.svg"],
     ["K8s", "kubernetes.svg"]
   ])("uses the same icon for %s in asset and favorite trees", (platform, filename) => {
-    const icon = resolveAssetIconFromFields({ platform }, "/luna/");
-    expect(icon.src).toBe(`/luna/icons/${filename}`);
-    expect(resolveAssetIconFromCandidates([undefined, platform, "asset"], "/luna/")).toEqual(icon);
-    expect(resolveAssetIconSrc(platform, "/luna/")).toBe(icon.src);
+    const icon = resolveAssetIconFromFields({ platform }, "/workspace/");
+    expect(icon.src).toBe(`/workspace/icons/${filename}`);
+    expect(resolveAssetIconFromCandidates([undefined, platform, "asset"], "/workspace/")).toEqual(icon);
+    expect(resolveAssetIconSrc(platform, "/workspace/")).toBe(icon.src);
   });
 
   it("keeps a known database vendor ahead of the generic database category", () => {

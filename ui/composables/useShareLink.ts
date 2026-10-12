@@ -9,7 +9,7 @@ export function useShareLink() {
 
   function shareURL(id: string, code: string, component: "koko" | "lion") {
     if (!id || !siteUrl.value) return "";
-    const path = `/luna/share/${encodeURIComponent(id)}/?code=${encodeURIComponent(code)}&component=${component}`;
+    const path = `/workspace/share/${encodeURIComponent(id)}/?code=${encodeURIComponent(code)}&component=${component}`;
     return isDesktopRuntime()
       ? new URL(path.slice(1), `${siteUrl.value.replace(/\/+$/, "")}/`).toString()
       : new URL(withWebSitePrefix(path), siteUrl.value).toString();

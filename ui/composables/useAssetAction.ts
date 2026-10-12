@@ -391,7 +391,7 @@ export const useAssetAction = () => {
       case "panda":
         return joinEndpointUrl(
           endpointUrl,
-          withWebSitePrefix(`/luna/lion/connect?token=${encodeURIComponent(tokenId)}`)
+          withWebSitePrefix(`/workspace/lion/connect?token=${encodeURIComponent(tokenId)}`)
         );
       case "koko":
       case "default":

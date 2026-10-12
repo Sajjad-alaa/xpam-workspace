@@ -62,11 +62,11 @@ function mountIcon(src: string) {
 }
 
 it.each(["mysql.svg", "chrome.svg"])("falls back and recovers after a failed %s image", async (filename) => {
-  const { props, root, unmount } = mountIcon(`/luna/icons/${filename}`);
+  const { props, root, unmount } = mountIcon(`/workspace/icons/${filename}`);
   try {
     const rendered = root.children[0]!;
     const image = rendered.type === "img" ? rendered : rendered.children[0]!;
-    expect(image.props.src).toBe(`/luna/icons/${filename}`);
+    expect(image.props.src).toBe(`/workspace/icons/${filename}`);
     if (filename === "mysql.svg") {
       expect(rendered.props.class).toContain("text-info");
       expect((rendered.props.style as Record<string, string>).maskImage).toContain(props.src);
@@ -76,7 +76,7 @@ it.each(["mysql.svg", "chrome.svg"])("falls back and recovers after a failed %s 
     await Vue.nextTick();
     expect(root.children[0]!.props["data-icon"]).toBe("i-lucide-database");
 
-    props.src = "/luna/icons/windows.svg";
+    props.src = "/workspace/icons/windows.svg";
     await Vue.nextTick();
     expect(root.children[0]!.type).toBe("img");
     expect(root.children[0]!.props.src).toBe(props.src);

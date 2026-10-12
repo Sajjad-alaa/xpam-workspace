@@ -117,7 +117,7 @@ export const getWebSitePrefix = (pathname = window.location.pathname) => {
   if (typeof globalBase === "string") return globalBase.replace(/\/+$/, "");
 
   const segments = pathname.split("/").filter(Boolean);
-  const lunaIndex = segments.indexOf("luna");
+  const lunaIndex = segments.indexOf("workspace");
 
   if (lunaIndex <= 0) return "";
 
@@ -132,7 +132,7 @@ export const getWebAppBasePath = (pathname = window.location.pathname) => {
   const globalLunaBase = (window as any).__LUNA_BASE__;
   if (typeof globalLunaBase === "string") return normalizeBasePath(globalLunaBase);
 
-  return joinPrefixedPath(getWebSitePrefix(pathname) || "/", "/luna/");
+  return joinPrefixedPath(getWebSitePrefix(pathname) || "/", "/workspace/");
 };
 
 export const isWebAuthPath = (pathname = window.location.pathname) => {

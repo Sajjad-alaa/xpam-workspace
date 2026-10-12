@@ -8,7 +8,7 @@ const tab = (protocol: string, connectMethod: NonNullable<WorkspaceSessionTab["p
     payload: {
       id: "token",
       endpointUrl: "https://connector.example",
-      webUrl: "https://connector.example/luna/lion/connect?token=token",
+      webUrl: "https://connector.example/workspace/lion/connect?token=token",
       connectMethod
     }
   }) as WorkspaceSessionTab;

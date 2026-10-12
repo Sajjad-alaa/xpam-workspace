@@ -7,7 +7,7 @@ const lionTarget = process.env.JMS_LION_DEV_URL || kokoTarget;
 const chenTarget = process.env.JMS_CHEN_DEV_URL || "http://localhost:8082";
 const kaelTarget = process.env.JMS_KAEL_DEV_URL || "http://localhost:8083";
 const uiTarget = process.env.JMS_UI_DEV_URL || "http://localhost:9528";
-const appBaseURL = process.env.NUXT_APP_BASE_URL || "/luna/";
+const appBaseURL = process.env.NUXT_APP_BASE_URL || "/workspace/";
 const lightDev = process.env.JMS_DEV_LIGHT === "1";
 const kokoRoot = fileURLToPath(new URL("./ui/koko", import.meta.url));
 const buildTime = new Date().toLocaleString("zh-CN", {
@@ -172,12 +172,12 @@ export default defineNuxtConfig({
           changeOrigin: true,
           configure: configureHttpProxy("kael", kaelTarget)
         },
-        "/luna/koko/ws/": {
+        "/workspace/koko/ws/": {
           target: kokoTarget.replace(/^http/i, "ws"),
           secure: false,
           ws: true,
           changeOrigin: true,
-          rewrite: (path) => path.replace(/^\/luna/, ""),
+          rewrite: (path) => path.replace(/^\/workspace/, ""),
           configure: bindProxyErrorHandler("luna-koko-ws")
         },
         "/koko/lion/": {
@@ -237,7 +237,7 @@ export default defineNuxtConfig({
           ws: true,
           changeOrigin: true
         },
-        "/ui/": {
+        "/web/": {
           target: uiTarget,
           secure: false,
           changeOrigin: true

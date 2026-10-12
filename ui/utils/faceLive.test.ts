@@ -13,18 +13,18 @@ import {
 
 describe("face live routing", () => {
   it("keeps a deployment prefix for Luna pages and WebSocket routes", () => {
-    expect(resolveJumpServerPrefix("/tenant-a", "/tenant-a/luna/workspace")).toBe("/tenant-a");
+    expect(resolveJumpServerPrefix("/tenant-a", "/tenant-a/workspace/workspace")).toBe("/tenant-a");
     expect(
       buildFaceLivePageUrl({
         siteUrl: "https://jump.example/tenant-a",
-        rendererPath: "/tenant-a/luna/workspace",
+        rendererPath: "/tenant-a/workspace/workspace",
         token: "a".repeat(32)
       })
-    ).toBe(`https://jump.example/tenant-a/luna/facelive/capture?token=${"a".repeat(32)}`);
+    ).toBe(`https://jump.example/tenant-a/workspace/facelive/capture?token=${"a".repeat(32)}`);
     expect(
       buildFaceLiveWebSocketUrl({
         siteUrl: "https://jump.example/tenant-a",
-        rendererPath: "/tenant-a/luna/facelive/monitor",
+        rendererPath: "/tenant-a/workspace/facelive/monitor",
         token: "b".repeat(32),
         mode: "monitor"
       })
@@ -32,9 +32,9 @@ describe("face live routing", () => {
   });
 
   it("uses root routes without adding duplicate app prefixes", () => {
-    expect(resolveJumpServerPrefix("/", "/luna/facelive/capture")).toBe("");
+    expect(resolveJumpServerPrefix("/", "/workspace/facelive/capture")).toBe("");
     expect(buildFaceLivePageUrl({ siteUrl: "http://localhost:3000", token: "x".repeat(32), mode: "monitor" })).toBe(
-      `http://localhost:3000/luna/facelive/monitor?token=${"x".repeat(32)}`
+      `http://localhost:3000/workspace/facelive/monitor?token=${"x".repeat(32)}`
     );
   });
 
@@ -42,18 +42,18 @@ describe("face live routing", () => {
     const token = "e".repeat(32);
     expect(
       buildFaceLiveRendererPageUrl({
-        rendererUrl: "http://127.0.0.1:3000/luna/",
+        rendererUrl: "http://127.0.0.1:3000/workspace/",
         siteUrl: "http://localhost:9528",
         token
       })
-    ).toBe(`http://127.0.0.1:3000/luna/facelive/capture?token=${token}&site=http%3A%2F%2Flocalhost%3A9528`);
+    ).toBe(`http://127.0.0.1:3000/workspace/facelive/capture?token=${token}&site=http%3A%2F%2Flocalhost%3A9528`);
   });
 
   it("supports a dedicated WebSocket service origin", () => {
     expect(
       buildFaceLiveWebSocketUrl({
-        siteUrl: "http://localhost:9528/luna/facelive/capture",
-        rendererPath: "/luna/facelive/capture",
+        siteUrl: "http://localhost:9528/workspace/facelive/capture",
+        rendererPath: "/workspace/facelive/capture",
         socketBaseUrl: "http://localhost:8080",
         token: "c".repeat(32),
         mode: "capture"
@@ -62,7 +62,7 @@ describe("face live routing", () => {
 
     expect(
       buildFaceLiveWebSocketUrl({
-        siteUrl: "https://ui.example/luna/facelive/capture",
+        siteUrl: "https://ui.example/workspace/facelive/capture",
         socketBaseUrl: "wss://core.example/tenant-a/",
         token: "d".repeat(32),
         mode: "monitor"

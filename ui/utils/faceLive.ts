@@ -15,7 +15,7 @@ export function isFaceCaptureToken(value: unknown): value is string {
 export function resolveJumpServerPrefix(sitePath = "/", rendererPath = "/") {
   for (const candidate of [rendererPath, sitePath]) {
     const normalized = trimPath(candidate);
-    const match = normalized.match(/^(.*)\/(?:luna|core|ui)(?:\/|$)/);
+    const match = normalized.match(/^(.*?)\/(?:workspace|core|web)(?:\/|$)/);
     if (match) return trimPath(match[1] || "");
   }
 
@@ -31,7 +31,7 @@ export function buildFaceLivePageUrl(options: {
   const site = new URL(options.siteUrl);
   const prefix = resolveJumpServerPrefix(site.pathname, options.rendererPath);
   const mode = options.mode || "capture";
-  site.pathname = `${prefix}/luna/facelive/${mode}`.replace(/\/{2,}/g, "/");
+  site.pathname = `${prefix}/workspace/facelive/${mode}`.replace(/\/{2,}/g, "/");
   site.search = "";
   site.hash = "";
   site.searchParams.set("token", options.token);
@@ -46,7 +46,7 @@ export function buildFaceLiveRendererPageUrl(options: {
 }) {
   const page = new URL(options.rendererUrl);
   const prefix = resolveJumpServerPrefix(page.pathname, page.pathname);
-  page.pathname = `${prefix}/luna/facelive/${options.mode || "capture"}`.replace(/\/{2,}/g, "/");
+  page.pathname = `${prefix}/workspace/facelive/${options.mode || "capture"}`.replace(/\/{2,}/g, "/");
   page.search = "";
   page.hash = "";
   page.searchParams.set("token", options.token);
