@@ -1,10 +1,19 @@
-<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1024 1024" role="img" aria-labelledby="title desc">
-  <title id="title">JumpServer WebLite</title>
-  <desc id="desc">A simple white globe on a green app icon.</desc>
-  <rect x="96" y="96" width="832" height="832" rx="192" fill="#27B88C"/>
-  <g fill="none" stroke="#FFFFFF" stroke-width="44">
-    <circle cx="512" cy="512" r="280"/>
-    <ellipse cx="512" cy="512" rx="128" ry="280"/>
-    <path d="M232 512h560"/>
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512" role="img" aria-label="XPAM">
+  <defs>
+    <linearGradient id="bg" x1="0" y1="0" x2="1" y2="1"><stop offset="0" stop-color="#16303f"/><stop offset="1" stop-color="#0b1823"/></linearGradient>
+    <linearGradient id="x" x1="0" y1="0" x2="1" y2="1"><stop offset="0" stop-color="#3fe6bd"/><stop offset="1" stop-color="#12a182"/></linearGradient>
+  </defs>
+  <g transform="translate(0 0) scale(1.0666666666666667) translate(-16 -16)">
+  <rect x="16" y="16" width="480" height="480" rx="112" fill="url(#bg)"/>
+  <circle cx="256" cy="256" r="168" fill="none" stroke="#1ab39499" stroke-width="14"/>
+  <g fill="#1ab39499">
+    <rect x="243" y="50" width="26" height="40" rx="11"/><rect x="243" y="422" width="26" height="40" rx="11"/>
+    <rect x="50" y="243" width="40" height="26" rx="11"/><rect x="422" y="243" width="40" height="26" rx="11"/>
+  </g>
+  <g stroke="url(#x)" stroke-width="68" stroke-linecap="round">
+    <line x1="146" y1="146" x2="366" y2="366"/><line x1="366" y1="146" x2="146" y2="366"/>
+  </g>
+  <circle cx="256" cy="256" r="58" fill="#0b1823" stroke="#3fe6bd" stroke-width="9"/>
+  <circle cx="256" cy="242" r="18" fill="#ffffff"/><path d="M246 250h20l8 42h-36z" fill="#ffffff"/>
   </g>
 </svg>
