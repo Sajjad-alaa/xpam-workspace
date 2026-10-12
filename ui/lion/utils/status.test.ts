@@ -16,6 +16,11 @@ describe("lion RemoteApp session status", () => {
     expect(isNativeRemoteAppSession(applet)).toBe(false);
     expect(isNativeRemoteAppSession(desktop)).toBe(false);
     expect(isNativeRemoteAppSession({})).toBe(false);
+    // Real koko session shape: platform at the top level, asset without platform
+    const kokoRemoteApp = { remote_app: { id: "a", name: "qgis-ltr-bin" }, platform: { name: "Windows-RemoteApp" }, asset: { name: "windows 1" } };
+    const kokoApplet = { remote_app: { id: "b", name: "chrome" }, platform: { name: "Website" }, asset: { name: "site" } };
+    expect(isNativeRemoteAppSession(kokoRemoteApp)).toBe(true);
+    expect(isNativeRemoteAppSession(kokoApplet)).toBe(false);
   });
 
   it("treats only logoff/disconnect notices as a normal end", () => {

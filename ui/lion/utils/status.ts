@@ -138,6 +138,7 @@ export function isNormalSessionEnd(details?: Pick<GuacamoleConnectionErrorDetail
 
 interface RemoteAppSessionLike {
   remote_app?: unknown;
+  platform?: { name?: unknown } | null;
   asset?: { platform?: { name?: unknown } | null } | null;
 }
 
@@ -146,7 +147,9 @@ interface RemoteAppSessionLike {
  * but their asset is the applet's target asset, which is never on the Windows-RemoteApp platform.
  */
 export function isNativeRemoteAppSession(session?: RemoteAppSessionLike | null): boolean {
-  return Boolean(session?.remote_app) && session?.asset?.platform?.name === REMOTE_APP_PLATFORM_NAME;
+  // koko sends the connection platform at the top level; the token's asset has no platform.
+  const platformName = session?.platform?.name || session?.asset?.platform?.name;
+  return Boolean(session?.remote_app) && platformName === REMOTE_APP_PLATFORM_NAME;
 }
 
 export function remoteAppEndMessageKey(connectedAt: number, endedAt: number = Date.now()) {
