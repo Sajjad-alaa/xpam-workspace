@@ -12,7 +12,7 @@
   },
   "peerDependencies": {
     "electron": "^44.0.0",
-    "vue": "^3.5.0",
+    "vue": "^3.5.42",
     "@nuxt/ui": "^4.11.0"
   }
 }

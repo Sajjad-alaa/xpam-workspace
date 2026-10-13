@@ -11,6 +11,25 @@ overrides:
   # builder 26.15.3 uses ElectronDownloadCacheMode, which @electron/get 3 does not export.
   "app-builder-lib@26.15.3>@electron/get": 5.1.0
   cpu-features: "-"
+  # Security floors for indirect dependencies (same major versions as before).
+  # Remove an entry once the packages that pull it in require the fixed version themselves.
+  "brace-expansion@^2": ^2.1.6
+  "brace-expansion@^5": ^5.0.11
+  devalue: ^5.9.3
+  "fast-uri@^3": ^3.1.7
+  "js-yaml@^4": ^4.3.2
+  "nanoid@^3": ^3.3.18
+  seroval: ^1.6.3
+  shell-quote: ^1.11.0
+  source-map-js: ^1.2.2
+  "svgo@^4": ^4.1.0
+  # editor packages are released together; keep them on one fixed version
+  "@tiptap/core": ^3.30.5
+  "@tiptap/pm": ^3.30.5
+  "undici@^7": ^7.29.1
+  "undici@^8": ^8.10.2
+  # one copy of the framework runtime for every package in the workspace
+  vue: ^3.5.42
 
 packages:
   - .
