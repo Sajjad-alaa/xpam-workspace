@@ -15,13 +15,16 @@ async function start() {
   const launch = await readLaunch(input);
   const profile = await mkdtemp(path.join(os.tmpdir(), "weblite-applet-"));
   app.setPath("userData", profile);
-  app.setName("JumpServer WebLite");
+  app.setName("XPAM WebLite");
+  // English is the application language: browser menus, dialogs and the Accept-Language sent to
+  // websites do not follow the publishing host's Windows language. Must be set before "ready".
+  app.commandLine.appendSwitch("lang", "en-US");
   await app.whenReady();
   Menu.setApplicationMenu(null);
   const win = new BrowserWindow({
     width: 1280,
     height: 850,
-    title: "JumpServer WebLite",
+    title: "XPAM WebLite",
     show: false,
     webPreferences: {
       preload: path.join(__dirname, "preload.cjs"),

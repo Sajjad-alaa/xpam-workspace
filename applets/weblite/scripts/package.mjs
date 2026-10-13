@@ -58,10 +58,12 @@ try {
     exe: "weblite.exe",
     icon: path.join(root, "assets/icon.ico"),
     programFilesFolderName: "WebLite",
+    // Keep the upstream folder: the applet manifest in core starts
+    // %ProgramFiles%/JumpServer/WebLite/weblite.exe, the path the Tinker agent expects.
     nestedFolderName: "JumpServer",
     shortName: "WebLite",
-    shortcutFolderName: "JumpServer",
-    appUserModelId: "com.jumpserver.weblite",
+    shortcutFolderName: "XPAM",
+    appUserModelId: "com.xpam.weblite",
     arch: "x64",
     defaultInstallMode: "perMachine",
     ui: { chooseDirectory: true },
@@ -71,7 +73,7 @@ try {
   const { wxsFile, wxsContent } = await creator.create();
   await writeFile(wxsFile, flattenWebLiteMsi(wxsContent, appDir, manifest.version));
   const { msiFile } = await creator.compile();
-  const installer = path.join(releaseOut, `JumpServer-WebLite-${manifest.version}-x64.msi`);
+  const installer = path.join(releaseOut, `XPAM-WebLite-${manifest.version}-x64.msi`);
   await mkdir(releaseOut, { recursive: true });
   await copyFile(msiFile, installer);
   console.info(`WebLite installer: ${installer}`);
