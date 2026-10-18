@@ -137,6 +137,9 @@ export function useConnectionFormState() {
 
     const hosted = accounts.find((account) => !account.alias?.startsWith("@"));
     if (hosted) return hosted.name;
+    // XPAM just-in-time account (created on the asset when connecting)
+    const jit = accounts.find((account) => account.alias === "@JIT");
+    if (jit) return jit.name;
     const dynamic = accounts.find((account) => account.alias === "@USER");
     if (dynamic) return getDynamicAccountLabel(dynamic);
     if (accounts.some((account) => account.alias === "@INPUT")) return getManualInputLabel();

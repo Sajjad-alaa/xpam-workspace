@@ -1,7 +1,7 @@
 {
   "name": "@jumpserver/weblite",
   "productName": "XPAM WebLite",
-  "version": "5.0.0",
+  "version": "5.1.0",
   "private": true,
   "description": "Managed browser for XPAM website asset connections",
   "author": "XPAM",

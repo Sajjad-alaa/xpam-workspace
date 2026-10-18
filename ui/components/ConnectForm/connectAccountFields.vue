@@ -48,14 +48,14 @@ const accountItems = computed(() => {
   });
 
   const hosted = filteredAnonymous
-    .filter((acc) => !acc.alias.includes("@"))
+    .filter((acc) => !acc.alias.includes("@") || acc.alias === "@JIT")
     .map((acc) => ({
       label: acc.name,
       value: acc.name
     }));
 
   const manual = filteredAnonymous
-    .filter((acc) => acc.alias.includes("@"))
+    .filter((acc) => acc.alias.includes("@") && acc.alias !== "@JIT")
     .map((acc) => {
       if (acc.alias === "@USER") {
         const base = t("Account.DynamicUser");

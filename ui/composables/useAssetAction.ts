@@ -254,7 +254,8 @@ export const useAssetAction = () => {
     if (saved?.username) return saved.username;
 
     const list = accounts || [];
-    const acc = list.find((a) => a && a.alias && !a.alias.startsWith("@"));
+    const acc =
+      list.find((a) => a && a.alias && !a.alias.startsWith("@")) || list.find((a) => a && a.alias === "@JIT");
 
     return acc?.name || "-";
   };
@@ -292,6 +293,10 @@ export const useAssetAction = () => {
       username.includes("Dynamic user");
 
     const isAnonymous = saved?.accountMode === "anonymous" || username.includes("@ANON");
+
+    // XPAM just-in-time account: always the @JIT alias
+    const jitAccount = _accounts.find((a) => a.alias === "@JIT");
+    if (jitAccount && (username === "@JIT" || username === jitAccount.name)) return "@JIT";
 
     // 已保存过托管账号的 ID 则优先使用
     if (!isManual && !isDynamic && !isAnonymous && saved?.accountId) {
@@ -890,6 +895,10 @@ export const useAssetAction = () => {
     } else if (effectiveMode === "anonymous" || selected?.includes("@ANON")) {
       input_username = "";
       input_secret = "";
+    } else if (matchedAccount?.alias === "@JIT" || selected === "@JIT") {
+      // XPAM just-in-time account: created on the asset by XPAM, nothing to enter
+      input_username = "";
+      input_secret = "";
     } else {
       // 托管账号：account 用 ID，input_username 用展示账号名
       input_username = selected || matchedAccount?.username || "";
@@ -917,6 +926,9 @@ export const useAssetAction = () => {
       }
       if (effectiveMode === "anonymous" || selected?.includes("@ANON")) {
         return "@ANON";
+      }
+      if (matchedAccount?.alias === "@JIT" || selected === "@JIT") {
+        return "@JIT";
       }
 
       if (ephemeral?.accountId) return ephemeral.accountId;

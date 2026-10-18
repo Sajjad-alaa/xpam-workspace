@@ -9,6 +9,8 @@ import { isConnectMethodAvailable } from "~/composables/useConnectMethods";
 import { useUserInfoStore } from "~/store/modules/userInfo";
 import { sortPermedProtocols } from "~/utils";
 
+const isJitAccount = (item?: { alias?: string } | null) => item?.alias === "@JIT";
+
 export interface ConnectionFormInfo {
   protocol: string;
   account: string;
@@ -68,14 +70,22 @@ export function useAssetConnection() {
           item.alias === account
       );
 
-      if (matched && !matched.alias.startsWith("@")) {
+      if (matched && isJitAccount(matched)) {
+        // XPAM just-in-time account: always sent as the @JIT alias (its id is not stable)
+        account = matched.name;
+        accountId = undefined;
+      } else if (matched && !matched.alias.startsWith("@")) {
         account = matched.name;
         accountId = matched.id;
       } else {
         const fallback = accounts.find((item) => item.alias && !item.alias.startsWith("@"));
+        const jit = accounts.find(isJitAccount);
         if (fallback) {
           account = fallback.name;
           accountId = fallback.id;
+        } else if (jit) {
+          account = jit.name;
+          accountId = undefined;
         } else {
           const special = accounts.find((item) => ["@USER", "@INPUT", "@ANON"].includes(item.alias));
           accountMode = special?.alias === "@USER" ? "dynamic" : special?.alias === "@INPUT" ? "manual" : "anonymous";
@@ -84,10 +94,10 @@ export function useAssetConnection() {
         }
       }
     } else if (!accounts.some((item) => item.alias === modeAlias[accountMode as keyof typeof modeAlias])) {
-      const fallback = accounts.find((item) => item.alias && !item.alias.startsWith("@"));
+      const fallback = accounts.find((item) => item.alias && !item.alias.startsWith("@")) || accounts.find(isJitAccount);
       accountMode = "hosted";
       account = fallback?.name || "";
-      accountId = fallback?.id;
+      accountId = fallback && !isJitAccount(fallback) ? fallback.id : undefined;
     }
 
     let connectMethod = "";
