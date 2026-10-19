@@ -77,7 +77,7 @@ watch(
 );
 
 const showWorkspaceSidebar = computed(() => {
-  if (uiWorkspaceMode.value === "files") return false;
+  if (uiWorkspaceMode.value === "files" || uiWorkspaceMode.value === "access") return false;
   if (uiWorkspaceMode.value === "tools") return isDesktopRuntime();
   return loggedIn.value;
 });
@@ -307,6 +307,18 @@ watch(
   { immediate: true }
 );
 
+// XPAM: warn before time-boxed access ends
+const jitExpiryWatcher = useJitExpiryWatcher();
+watch(
+  loggedIn,
+  (value) => {
+    if (!import.meta.client) return;
+    if (value) jitExpiryWatcher.start();
+    else jitExpiryWatcher.stop();
+  },
+  { immediate: true }
+);
+
 onMounted(() => {
   if (isDesktopRuntime()) {
     standaloneAssetWindow.value = desktopWindow.label().startsWith("asset-");
@@ -452,5 +464,6 @@ onBeforeUnmount(() => {
         </SettingsShell>
       </div>
     </Transition>
+    <AccessJitMfaModal />
   </UCard>
 </template>

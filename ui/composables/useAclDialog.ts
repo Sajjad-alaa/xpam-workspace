@@ -475,8 +475,8 @@ async function callTicketApi(api: { method: string; url: string }) {
 
 export async function createConnectionTokenWithAcl(
   body: ConnectionBody,
-  meta: { orgId?: string; assetName: string; scopeId?: string; batchId?: string; admin?: boolean }
-) {
+  meta: { orgId?: string; assetName: string; scopeId?: string; batchId?: string; admin?: boolean; mfaRetried?: boolean }
+): Promise<any> {
   try {
     const token = await createConnectionToken(body, meta.orgId, { admin: meta.admin });
     const pending = requestAcl(token, { body, ...meta });
@@ -484,6 +484,11 @@ export async function createConnectionTokenWithAcl(
     if (!token.id) throw new Error(token.detail || "Missing connection token");
     return token;
   } catch (error) {
+    // XPAM: the just-in-time policy asks for MFA first; verify it and try once more
+    if (error instanceof ApiRequestError && error.data?.code === "jit_mfa_required" && !meta.mfaRetried) {
+      if (await promptJitMfa()) return createConnectionTokenWithAcl(body, { ...meta, mfaRetried: true });
+      throw error;
+    }
     const pending = requestAcl(error, { body, ...meta });
     if (!pending) throw error;
     return pending;

@@ -1,4 +1,4 @@
-export type WorkspaceMode = "assets" | "files" | "tools";
+export type WorkspaceMode = "assets" | "files" | "tools" | "access";
 
 function routeHaystack(route: { path?: string; name?: unknown; fullPath?: string }) {
   return `${route.path || ""} ${route.fullPath || ""} ${String(route.name || "")}`.toLowerCase();
@@ -18,6 +18,7 @@ export const useWorkspaceMode = () => {
     const isToolRoute = hay.includes("/tools") || hay.includes("videoplayer") || hay.includes("transcode");
 
     if (isFileRoute) return "files";
+    if (hay.includes("/access")) return "access";
     if (isFaceRoute) return "tools";
     if (isDesktopRuntime() && isToolRoute) return "tools";
     return "assets";

@@ -772,6 +772,10 @@ onBeforeUnmount(() => {
   if (autoPageLoadFrame != null) window.cancelAnimationFrame(autoPageLoadFrame);
 });
 
+useEventBus().on("accessChanged", () => {
+  void refresh();
+});
+
 useEventBus().on("assetRenamed", ({ assetId, name }) => {
   applyAssetRename(authorizationNodes.value, assetId, name);
   applyAssetRename(typeNodes.value, assetId, name);

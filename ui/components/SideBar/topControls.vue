@@ -27,12 +27,19 @@ const workspaceModes = computed(() => {
       icon: "i-lucide-folder-kanban",
       label: t("Menu.FileManager"),
       tooltip: t("Menu.FileManager")
+    },
+    {
+      key: "access",
+      icon: "i-lucide-key-round",
+      label: t("Menu.Access"),
+      tooltip: t("Menu.AccessTip")
     }
-  ] as Array<{ key: "assets" | "files"; icon: string; label: string; tooltip: string }>;
+  ] as Array<{ key: "assets" | "files" | "access"; icon: string; label: string; tooltip: string }>;
 });
 
-const setMode = async (mode: "assets" | "files") => {
-  await navigateTo(localePath({ path: mode === "files" ? "/files" : "/" }));
+const setMode = async (mode: "assets" | "files" | "access") => {
+  const paths = { assets: "/", files: "/files", access: "/access" };
+  await navigateTo(localePath({ path: paths[mode] }));
 };
 
 const toggleSidebar = () => {

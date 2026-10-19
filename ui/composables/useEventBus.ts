@@ -30,6 +30,8 @@ type BusEvents = {
   workspaceConnectAsset: AssetItem;
   workspaceQuickConnectAsset: AssetItem;
   workspaceQuickSearch: undefined;
+  // XPAM: time-boxed access was granted or ended, the authorized assets changed
+  accessChanged: undefined;
 } & Record<EventType, unknown>;
 
 const emitter: Emitter<BusEvents> = mitt<BusEvents>();
