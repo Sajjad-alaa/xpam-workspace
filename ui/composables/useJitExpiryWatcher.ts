@@ -5,6 +5,7 @@ export function useJitExpiryWatcher() {
   const localePath = useLocalePath();
   const warned = new Set<string>();
   let lastGrants: string | null = null;
+  let lastApprovals = 0;
 
   async function check() {
     let data;
@@ -16,6 +17,16 @@ export function useJitExpiryWatcher() {
     const grants = data.grants.map((g) => `${g.id}:${g.date_expired}`).join();
     if (lastGrants !== null && lastGrants !== grants) useEventBus().emit("accessChanged", undefined);
     lastGrants = grants;
+    const waiting = data.approvals_waiting || 0;
+    if (waiting > lastApprovals) {
+      toast.add({
+        title: t("Access.ApprovalsWaiting", { n: waiting }),
+        color: "info",
+        icon: "i-lucide-inbox",
+        actions: [{ label: t("Access.Review"), onClick: () => navigateTo(localePath({ path: "/access" })) }]
+      });
+    }
+    lastApprovals = waiting;
     const skew = Date.parse(data.server_time) - Date.now();
     for (const grant of data.grants) {
       const key = `${grant.id}:${grant.date_expired}`;

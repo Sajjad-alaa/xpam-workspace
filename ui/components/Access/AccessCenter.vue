@@ -1,7 +1,7 @@
 <script setup lang="ts">
 // XPAM zero standing privilege: the user's time-boxed access, requests and extensions in one place.
 import type { AssetItem } from "~/types";
-import type { JitAccessOverview, JitGrant, JitRequestableAsset } from "~/composables/useJitAccess";
+import type { JitAccessOverview, JitApprovalItem, JitGrant, JitRequestableAsset } from "~/composables/useJitAccess";
 
 const { t } = useI18n();
 const toast = useToast();
@@ -29,6 +29,48 @@ const categoryIcon = (category: string) =>
 
 const errorText = (e: any) => e?.data?.detail || e?.message || String(e);
 
+// approvals waiting for me
+const approvals = ref<JitApprovalItem[]>([]);
+const rejecting = ref("");
+const decisionNote = ref("");
+
+async function loadApprovals() {
+  try {
+    approvals.value = await getJitApprovals();
+  } catch {
+    approvals.value = [];
+  }
+}
+
+async function decide(item: JitApprovalItem, action: "approve" | "reject") {
+  if (action === "reject" && rejecting.value !== item.id) {
+    rejecting.value = item.id;
+    decisionNote.value = "";
+    return;
+  }
+  busy.value = item.id;
+  try {
+    const ticket = await decideJitApproval(item.id, action, action === "reject" ? decisionNote.value : "");
+    toast.add({
+      title:
+        action === "reject"
+          ? t("Access.Rejected")
+          : ticket.status === "open"
+            ? t("Access.ApprovedNextLevel")
+            : t("Access.Approved"),
+      color: action === "reject" ? "neutral" : "success"
+    });
+    rejecting.value = "";
+    await Promise.all([loadApprovals(), load()]);
+  } catch (e) {
+    toast.add({ title: t("Access.RequestFailed"), description: errorText(e), color: "error" });
+  } finally {
+    busy.value = "";
+  }
+}
+
+const flagColor = (key: string) => (["admin", "long", "no_rule"].includes(key) ? "warning" : "neutral");
+
 async function load() {
   loading.value = true;
   try {
@@ -38,6 +80,7 @@ async function load() {
     if (overview.value && before !== after) useEventBus().emit("accessChanged", undefined);
     overview.value = data;
     skew.value = Date.parse(data.server_time) - Date.now();
+    if (data.approvals_waiting || approvals.value.length) void loadApprovals();
   } catch (e) {
     toast.add({ title: t("Access.LoadFailed"), description: errorText(e), color: "error" });
   } finally {
@@ -202,6 +245,7 @@ useIntervalFn(() => void load(), 60000);
 onMounted(() => {
   void load();
   void find();
+  void loadApprovals();
 });
 </script>
 
@@ -224,6 +268,78 @@ onMounted(() => {
           {{ t("Common.Refresh") }}
         </UButton>
       </div>
+
+      <!-- approvals waiting for me -->
+      <section v-if="approvals.length" class="flex flex-col gap-2">
+        <h2 class="text-sm font-semibold">
+          {{ t("Access.ApprovalsTitle", { n: approvals.length }) }}
+        </h2>
+        <div
+          v-for="item of approvals"
+          :key="item.id"
+          class="flex flex-col gap-2 rounded-[var(--app-radius)] border border-[var(--app-border)] bg-[var(--app-card-bg-soft)] p-4"
+        >
+          <div class="flex flex-wrap items-baseline justify-between gap-2">
+            <div class="text-sm">
+              <span class="font-semibold">{{ item.applicant.name }}</span>
+              {{ t("Access.AsksFor", { hours: item.hours ?? "-" }) }}
+              <span class="font-semibold">{{ item.assets.join(", ") }}</span>
+              <span v-if="item.assets_count > item.assets.length">+{{ item.assets_count - item.assets.length }}</span>
+            </div>
+            <span class="text-xs text-[var(--app-text-muted)]">
+              {{ formatTime(item.date_start) }} – {{ formatTime(item.date_expired) }}
+              <template v-if="item.levels > 1">· {{ t("Access.Level", { n: item.level, of: item.levels }) }}</template>
+            </span>
+          </div>
+          <div v-if="item.reason" class="text-sm">
+            <span class="text-[var(--app-text-muted)]">{{ t("Access.Reason") }}:</span>
+            {{ item.reason }}
+          </div>
+          <div class="flex flex-wrap gap-1">
+            <UBadge v-for="f of item.flags" :key="f.key" size="sm" variant="subtle" :color="flagColor(f.key)">
+              {{ f.text }}
+            </UBadge>
+            <UBadge v-for="r of item.rules" :key="r" size="sm" variant="outline" color="neutral">{{ r }}</UBadge>
+          </div>
+          <div class="flex flex-wrap items-center gap-2">
+            <UButton size="sm" icon="i-lucide-check" :loading="busy === item.id" @click="decide(item, 'approve')">
+              {{ t("Access.Approve") }}
+            </UButton>
+            <template v-if="rejecting === item.id">
+              <UInput
+                v-model="decisionNote"
+                size="sm"
+                class="min-w-64 flex-1"
+                autofocus
+                :placeholder="t('Access.RejectReason')"
+                @keydown.enter="decisionNote.trim() && decide(item, 'reject')"
+              />
+              <UButton
+                size="sm"
+                color="error"
+                :disabled="!decisionNote.trim()"
+                :loading="busy === item.id"
+                @click="decide(item, 'reject')"
+              >
+                {{ t("Access.Reject") }}
+              </UButton>
+              <UButton size="sm" color="neutral" variant="ghost" @click="rejecting = ''">
+                {{ t("Common.Cancel") }}
+              </UButton>
+            </template>
+            <UButton
+              v-else
+              size="sm"
+              color="neutral"
+              variant="outline"
+              icon="i-lucide-x"
+              @click="decide(item, 'reject')"
+            >
+              {{ t("Access.Reject") }}
+            </UButton>
+          </div>
+        </div>
+      </section>
 
       <div class="grid gap-4 lg:grid-cols-[3fr_2fr]">
         <!-- my access -->
@@ -426,7 +542,12 @@ onMounted(() => {
           <div v-if="overview?.recent.length" class="flex flex-col gap-1">
             <h3 class="text-xs font-semibold uppercase text-[var(--app-text-muted)]">{{ t("Access.Recent") }}</h3>
             <div v-for="r of overview.recent" :key="r.id" class="flex items-center justify-between gap-2 px-1 text-sm">
-              <span class="truncate">{{ r.title }}</span>
+              <span class="min-w-0">
+                <span class="block truncate">{{ r.title }}</span>
+                <span v-if="r.note" class="block truncate text-xs text-[var(--app-text-muted)]">
+                  {{ r.note.by }}: {{ r.note.text }}
+                </span>
+              </span>
               <UBadge
                 size="sm"
                 variant="subtle"

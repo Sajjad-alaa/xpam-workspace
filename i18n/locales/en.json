@@ -2615,6 +2615,18 @@
     "MfaCode": "Code",
     "MfaSendCode": "Send code",
     "MfaVerify": "Verify",
-    "MfaFailed": "The code is not valid"
+    "MfaFailed": "The code is not valid",
+    "ApprovalsTitle": "Waiting for your approval ({n})",
+    "AsksFor": "asks for {hours} h on",
+    "Level": "step {n} of {of}",
+    "Reason": "Reason",
+    "Approve": "Approve",
+    "Reject": "Reject",
+    "RejectReason": "Why? (the requester sees this)",
+    "Approved": "Approved — the access starts now",
+    "ApprovedNextLevel": "Approved — the next approver decides now",
+    "Rejected": "Rejected",
+    "ApprovalsWaiting": "{n} access request(s) wait for your approval",
+    "Review": "Review"
   }
 }

@@ -48,6 +48,7 @@ export interface JitRecentRequest {
   state: string;
   auto: string;
   date_updated: string;
+  note?: { by: string; text: string } | null;
 }
 
 export interface JitLiveAccount {
@@ -65,6 +66,7 @@ export interface JitAccessOverview {
   pending: JitPendingRequest[];
   recent: JitRecentRequest[];
   accounts: JitLiveAccount[];
+  approvals_waiting?: number;
   server_time: string;
 }
 
@@ -110,3 +112,31 @@ export function formatJitTimeLeft(seconds: number) {
   if (m > 0) return `${m} min`;
   return `${s % 60} s`;
 }
+
+export interface JitApprovalFlag {
+  key: string;
+  text: string;
+}
+
+export interface JitApprovalItem {
+  id: string;
+  serial_num: string;
+  title: string;
+  applicant: { id: string; name: string };
+  reason: string;
+  assets: string[];
+  assets_count: number;
+  rules: string[];
+  date_start: string;
+  date_expired: string;
+  hours: number | null;
+  date_created: string;
+  level: number;
+  levels: number;
+  flags: JitApprovalFlag[];
+}
+
+export const getJitApprovals = () => apiRequest<JitApprovalItem[]>({ method: "GET", path: `${BASE}approvals/` });
+
+export const decideJitApproval = (id: string, action: "approve" | "reject", comment: string) =>
+  apiRequest<JitTicketBrief>({ method: "POST", path: `${BASE}${id}/${action}/`, body: { comment } });
