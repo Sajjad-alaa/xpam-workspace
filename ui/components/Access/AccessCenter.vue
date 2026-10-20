@@ -1,7 +1,7 @@
 <script setup lang="ts">
 // XPAM zero standing privilege: the user's time-boxed access, requests and extensions in one place.
-import type { AssetItem } from "~/types";
 import type { JitAccessOverview, JitApprovalItem, JitGrant, JitRequestableAsset } from "~/composables/useJitAccess";
+import type { AssetItem } from "~/types";
 
 const { t } = useI18n();
 const toast = useToast();
