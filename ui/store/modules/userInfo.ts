@@ -530,6 +530,18 @@ export const useUserInfoStore = defineStore(
     persist: {
       key: "userInfoV2",
       storage: localStorage,
+      // the access token never goes to localStorage (plain text on disk, readable by any script of
+      // this origin); the desktop client restores it from its encrypted store at start
+      serializer: {
+        serialize: (state) => {
+          const copy = JSON.parse(JSON.stringify(state));
+          for (const user of Object.values(copy.userMap || {})) {
+            if (user && typeof user === "object") (user as { bearerToken?: string }).bearerToken = "";
+          }
+          return JSON.stringify(copy);
+        },
+        deserialize: (value) => JSON.parse(value)
+      },
       afterHydrate: ({ store }) => {
         normalizeStoredConnections(store.$state as Parameters<typeof normalizeStoredConnections>[0]);
         store.$persist();

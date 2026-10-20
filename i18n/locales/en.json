@@ -162,7 +162,10 @@
     "SelectRow": "Select row",
     "Untitled": "Untitled",
     "ClearInput": "Clear input",
-    "Unsaved": "Unsaved"
+    "Unsaved": "Unsaved",
+    "Back": "Back",
+    "Forward": "Forward",
+    "Reload": "Reload"
   },
   "DesktopMenu": {
     "File": "File",

@@ -27,6 +27,7 @@ import { ApplicationConfigService } from "../apps/application-config";
 import { LocalApplicationLauncher } from "../apps/local-app-launcher";
 import { listSystemFonts } from "../apps/system-fonts";
 import { DesktopAuthService } from "../auth/service";
+import { CertificatePins } from "./certificate-pins";
 import { isOAuthCallbackUrl } from "../auth/oauth-callback";
 import { FaceEngineManager } from "../face/manager";
 import { isFaceLiveWebSocket } from "../face/socket-policy";
@@ -138,7 +139,8 @@ function installConnectorSessionHooks(targetSession) {
         const isChenSocket = target.pathname.startsWith("/webconnector/ws/") && allowedChenOrigins.has(httpOrigin);
         // Lion is hosted by Koko and needs the same desktop WebSocket origin handling.
         const isKokoSocket =
-          (target.pathname.startsWith("/secureconnection/ws/") || target.pathname.startsWith("/secureconnection/desktop/ws/")) &&
+          (target.pathname.startsWith("/secureconnection/ws/") ||
+            target.pathname.startsWith("/secureconnection/desktop/ws/")) &&
           allowedKokoOrigins.has(httpOrigin);
         let activeSiteOrigin = "";
         try {
@@ -234,6 +236,18 @@ async function proxyChenRequest(request, url) {
     statusText: response.statusText,
     headers: responseHeaders
   });
+}
+
+// jms-asset:// serves offline recordings (and files the user picked in a dialog) to the app only:
+// never the whole home folder, never to other origins (remote pages run in the same session).
+const dialogSelectedFiles = new Set<string>();
+const ASSET_ORIGIN = isDevelopment ? "*" : "jms-app://app";
+
+function assetPath(candidate) {
+  const resolved = normalizePath(candidate);
+  const recordings = path.resolve(path.join(app.getPath("userData"), "offline-recordings"));
+  if (resolved.startsWith(`${recordings}${path.sep}`) || dialogSelectedFiles.has(resolved)) return resolved;
+  throw new Error(`Path is not an offline recording: ${resolved}`);
 }
 
 function normalizePath(candidate) {
@@ -1065,7 +1079,10 @@ async function handleInvoke(event, request) {
       ]
     });
     if (result.canceled) return null;
-    result.filePaths.forEach((filePath) => allowedPaths.add(filePath));
+    result.filePaths.forEach((filePath) => {
+      allowedPaths.add(filePath);
+      dialogSelectedFiles.add(path.resolve(filePath));
+    });
     return args.options?.multiple ? result.filePaths : result.filePaths[0];
   }
   if (command === "plugin:dialog|save") {
@@ -1208,7 +1225,8 @@ async function handleInvoke(event, request) {
         (args.successSelector || args.interactiveSelector || args.allowedUrls?.length))
     ) {
       const settings = await authService.apiRequest({ method: "GET", path: "/api/v1/settings/public/" });
-      if (settings?.XPACK_LICENSE_IS_VALID !== true) throw new Error("This advanced web feature requires a valid enterprise license");
+      if (settings?.XPACK_LICENSE_IS_VALID !== true)
+        throw new Error("This advanced web feature requires a valid enterprise license");
     }
     return withIpcErrorLog(command, () => webProxyManager.invoke(command, event, win, args));
   }
@@ -1299,7 +1317,7 @@ async function registerProtocols() {
       return new Response(null, {
         status: 204,
         headers: {
-          "access-control-allow-origin": "*",
+          "access-control-allow-origin": ASSET_ORIGIN,
           "access-control-allow-methods": "GET, HEAD, OPTIONS",
           "access-control-allow-headers": "Range"
         }
@@ -1309,7 +1327,7 @@ async function registerProtocols() {
     try {
       const url = parseUrl(request.url);
       const decodedPath = decodeURIComponent(url.pathname);
-      const filePath = normalizePath(process.platform === "win32" ? decodedPath.replace(/^\/+/, "") : decodedPath);
+      const filePath = assetPath(process.platform === "win32" ? decodedPath.replace(/^\/+/, "") : decodedPath);
       const fileInfo = await stat(filePath);
       if (!fileInfo.isFile()) return new Response("Not found", { status: 404 });
       const fileLength = fileInfo.size;
@@ -1322,7 +1340,7 @@ async function registerProtocols() {
         if (!match || fileLength === 0) {
           return new Response("Invalid byte range", {
             status: 416,
-            headers: { "content-range": `bytes */${fileLength}`, "access-control-allow-origin": "*" }
+            headers: { "content-range": `bytes */${fileLength}`, "access-control-allow-origin": ASSET_ORIGIN }
           });
         }
         if (match[1]) {
@@ -1331,7 +1349,7 @@ async function registerProtocols() {
           if (!Number.isSafeInteger(start) || !Number.isSafeInteger(end) || start > end || start >= fileLength) {
             return new Response("Invalid byte range", {
               status: 416,
-              headers: { "content-range": `bytes */${fileLength}`, "access-control-allow-origin": "*" }
+              headers: { "content-range": `bytes */${fileLength}`, "access-control-allow-origin": ASSET_ORIGIN }
             });
           }
         } else {
@@ -1352,7 +1370,7 @@ async function registerProtocols() {
             : "application/octet-stream";
       const responseLength = fileLength === 0 ? 0 : end - start + 1;
       const headers = {
-        "access-control-allow-origin": "*",
+        "access-control-allow-origin": ASSET_ORIGIN,
         "accept-ranges": "bytes",
         "content-length": String(responseLength),
         "content-type": contentType
@@ -1364,7 +1382,7 @@ async function registerProtocols() {
           : readableToWebBody(createReadStream(filePath, { start, end }));
       return new Response(body, { status: statusCode, headers });
     } catch {
-      return new Response("Not found", { status: 404, headers: { "access-control-allow-origin": "*" } });
+      return new Response("Not found", { status: 404, headers: { "access-control-allow-origin": ASSET_ORIGIN } });
     }
   });
 }
@@ -1463,10 +1481,47 @@ app.whenReady().then(async () => {
   localApplicationLauncher = new LocalApplicationLauncher(app, projectRoot, applicationConfig, shell, !isDevelopment);
   authService = new DesktopAuthService(emitDesktopEvent);
   await authService.initialize();
+  const certificatePins = new CertificatePins(app.getPath("userData"));
+  const certificatePrompts = new Map<string, Promise<boolean>>();
   electronSession.defaultSession.setCertificateVerifyProc((request, callback) => {
-    // ponytail: accept any cert for user-entered JumpServer hosts; pin/TOFU if MITM becomes a real threat
-    // Other hosts (including plugin downloads) must use Chromium's certificate verification.
-    callback(authService.isTrustedSiteHost(request.hostname) ? 0 : -3);
+    // Other hosts (including plugin downloads) always use Chromium's certificate verification. The
+    // XPAM server may use a self-signed certificate: trusted on first use, then pinned.
+    if (!authService.isTrustedSiteHost(request.hostname)) {
+      callback(-3);
+      return;
+    }
+    const fingerprint = String(request.certificate?.fingerprint || "");
+    const decision = certificatePins.decide(request.hostname, request.errorCode, fingerprint);
+    if (decision !== "ask") {
+      callback(decision);
+      return;
+    }
+    const key = `${request.hostname}|${fingerprint}`;
+    // one question per changed certificate, however many connections ask at the same time
+    let pending = certificatePrompts.get(key);
+    if (!pending) {
+      pending = dialog
+        .showMessageBox({
+          type: "warning",
+          title: "Server certificate changed",
+          message: `The certificate of ${request.hostname} is not the one this computer trusted before.`,
+          detail:
+            "Continue only if your administrator replaced the server certificate. Otherwise someone may be " +
+            `intercepting the connection.\n\nNew fingerprint: ${fingerprint}`,
+          buttons: ["Cancel", "Trust the new certificate"],
+          defaultId: 0,
+          cancelId: 0,
+          noLink: true
+        })
+        .then(({ response }) => {
+          if (response === 1) certificatePins.set(request.hostname, fingerprint);
+          return response === 1;
+        })
+        .catch(() => false)
+        .finally(() => certificatePrompts.delete(key));
+      certificatePrompts.set(key, pending);
+    }
+    void pending.then((trusted) => callback(trusted ? 0 : -2));
   });
   const quitAfterProtocolLaunch = await drainPendingProtocolUrls();
   if (quitAfterProtocolLaunch) {

@@ -533,7 +533,7 @@ watch(
           color="neutral"
           variant="ghost"
           size="xs"
-          :aria-label="t('Back')"
+          :aria-label="t('Common.Back')"
           @click="browserBack"
         />
         <UButton
@@ -541,7 +541,7 @@ watch(
           color="neutral"
           variant="ghost"
           size="xs"
-          :aria-label="t('Forward')"
+          :aria-label="t('Common.Forward')"
           @click="browserForward"
         />
         <UButton
@@ -549,7 +549,7 @@ watch(
           color="neutral"
           variant="ghost"
           size="xs"
-          :aria-label="t('Reload')"
+          :aria-label="t('Common.Reload')"
           @click="browserReload"
         />
         <span class="max-w-48 truncate px-1 text-xs text-muted">{{ sessionObject?.asset?.name }}</span>

@@ -16,7 +16,9 @@ const now = ref(Date.now());
 const search = ref("");
 const searching = ref(false);
 const requestable = ref<JitRequestableAsset[]>([]);
-const selected = ref<string[]>([]);
+// the chosen assets themselves (a new search must not hide them from the limits or the request)
+const chosen = ref<JitRequestableAsset[]>([]);
+const selected = computed(() => chosen.value.map((a) => a.id));
 const hours = ref(1);
 const reason = ref("");
 const submitting = ref(false);
@@ -111,7 +113,7 @@ const progress = (grant: JitGrant) => {
 };
 const warnSoon = (grant: JitGrant) => secondsLeft(grant) <= (grant.policy?.warn_minutes || 15) * 60;
 
-const selectedAssets = computed(() => requestable.value.filter((a) => selected.value.includes(a.id)));
+const selectedAssets = computed(() => chosen.value);
 const maxHours = computed(() =>
   selectedAssets.value.length ? Math.min(...selectedAssets.value.map((a) => a.policy.max_hours)) : 8
 );
@@ -141,7 +143,8 @@ function toggle(id: string) {
     toast.add({ title: t("Access.OneOrg"), color: "warning" });
     return;
   }
-  selected.value = selected.value.includes(id) ? selected.value.filter((x) => x !== id) : [...selected.value, id];
+  if (selected.value.includes(id)) chosen.value = chosen.value.filter((a) => a.id !== id);
+  else if (asset) chosen.value = [...chosen.value, asset];
 }
 
 async function submit() {
@@ -158,7 +161,7 @@ async function submit() {
     } else {
       toast.add({ title: t("Access.Sent"), description: t("Access.SentHelp"), color: "info" });
     }
-    selected.value = [];
+    chosen.value = [];
     reason.value = "";
     await load();
   } catch (e) {

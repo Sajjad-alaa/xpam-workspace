@@ -5,7 +5,7 @@ import { webProxyNavigationPolicy } from "@jumpserver/web-proxy/script";
 
 export function standaloneLaunch() {
   return {
-    targetUrl: "https://www.jumpserver.org/",
+    targetUrl: "about:blank",
     safeMode: false,
     allowedUrls: [],
     localSession: null,

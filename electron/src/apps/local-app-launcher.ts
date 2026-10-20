@@ -38,7 +38,40 @@ function sanitizedName(raw) {
   } catch {
     // Keep the original plugin-provided label when it is not URI encoded.
   }
-  return decoded.replaceAll(" ", "").replace(/[:-]/g, "_");
+  // Letters, digits, "." and "_" only: the name reaches command lines and file names
+  // (no shell characters, no "/" "\" or ".." path parts).
+  return decoded
+    .replace(/[^\p{L}\p{N}._]/gu, "_")
+    .replace(/\.{2,}/g, "_")
+    .slice(0, 80);
+}
+
+// jms2:// links are unsigned and any website can open them. Every value that goes into a client
+// command line must have the exact shape XPAM itself produces, so that no shell character
+// ($, `, ;, &, |, quotes, spaces...) can ever reach a terminal or cmd.exe.
+const PAYLOAD_RULES: Record<string, RegExp> = {
+  protocol: /^[a-z][a-z0-9]{1,15}$/,
+  tokenId: /^[A-Za-z0-9-]{1,64}$/,
+  tokenValue: /^[A-Za-z0-9._~+=/-]{0,512}$/,
+  host: /^(?:[A-Za-z0-9](?:[A-Za-z0-9-]{0,62}[A-Za-z0-9])?)(?:\.[A-Za-z0-9](?:[A-Za-z0-9-]{0,62}[A-Za-z0-9])?)*$|^\[?[0-9A-Fa-f:.]{2,45}\]?$/,
+  dbName: /^[A-Za-z0-9_.$-]{0,128}$/
+};
+
+function validatePayload(payload) {
+  const fail = (field) => {
+    throw new Error(`local client payload has an invalid ${field}`);
+  };
+  if (!PAYLOAD_RULES.protocol.test(String(payload.protocol || ""))) fail("protocol");
+  if (!PAYLOAD_RULES.tokenId.test(String(payload.token?.id || ""))) fail("token");
+  if (!PAYLOAD_RULES.tokenValue.test(String(payload.token?.value || ""))) fail("token");
+  if (payload.endpoint) {
+    const host = String(payload.endpoint.host || "");
+    if (host && !PAYLOAD_RULES.host.test(host)) fail("host");
+    const port = String(payload.endpoint.port ?? "");
+    if (port && !(/^\d{1,5}$/.test(port) && Number(port) >= 1 && Number(port) <= 65535)) fail("port");
+  }
+  if (!PAYLOAD_RULES.dbName.test(String(payload.asset?.info?.db_name || ""))) fail("database name");
+  return payload;
 }
 
 function username(payload) {
@@ -270,7 +303,7 @@ export class LocalApplicationLauncher {
   }
 
   async launch(raw) {
-    const payload = decodePayload(raw);
+    const payload = validatePayload(decodePayload(raw));
     if (!payload.protocol || !payload.token?.id) {
       throw new Error("local client payload is missing required connection fields");
     }
@@ -320,4 +353,11 @@ export class LocalApplicationLauncher {
   }
 }
 
-export const localAppLauncherInternals = { decodePayload, render, splitArguments, valuesFor };
+export const localAppLauncherInternals = {
+  decodePayload,
+  render,
+  splitArguments,
+  valuesFor,
+  validatePayload,
+  sanitizedName
+};

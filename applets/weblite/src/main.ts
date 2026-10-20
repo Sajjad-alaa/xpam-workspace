@@ -13,6 +13,12 @@ async function start() {
   const input =
     process.platform === "win32" && !isatty(0) ? createReadStream("", { fd: 0, autoClose: false }) : process.stdin;
   const launch = await readLaunch(input);
+  // XPAM: on a publishing host WebLite only runs for a connection (Tinker passes the launch data);
+  // started on its own it would be a free, unrecorded browser on the internal network
+  if (launch.standalone && app.isPackaged) {
+    app.exit(1);
+    return;
+  }
   const profile = await mkdtemp(path.join(os.tmpdir(), "weblite-applet-"));
   app.setPath("userData", profile);
   app.setName("XPAM WebLite");

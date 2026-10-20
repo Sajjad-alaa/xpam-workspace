@@ -41,6 +41,10 @@ export function createHostBridge() {
   const bindPostMessage = () => {
     if (!import.meta.client) return () => {};
     const listener = (event: MessageEvent) => {
+      // only the page that embeds this terminal, on the same origin: any other window (an opener, a
+      // popup, another site) could otherwise type commands into live sessions (CMD messages)
+      if (window.parent === window || event.source !== window.parent) return;
+      if (event.origin !== window.location.origin) return;
       const message = event.data as HostMessage;
       if (!message?.name) return;
       handleExternalMessage(message);

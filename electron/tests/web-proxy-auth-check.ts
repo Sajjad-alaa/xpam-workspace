@@ -72,7 +72,7 @@ export async function runProxyAuthChecks() {
     }
     if (request.headers["proxy-authorization"] !== expected || failAuthentication) {
       challenged++;
-      response.writeHead(407, { "Proxy-Authenticate": 'Basic realm="JumpServer Web Proxy"' });
+      response.writeHead(407, { "Proxy-Authenticate": 'Basic realm="XPAM Web Proxy"' });
       response.end();
       return;
     }
@@ -92,7 +92,7 @@ export async function runProxyAuthChecks() {
     if (request.headers["proxy-authorization"] !== expected || failAuthentication) {
       challenged++;
       socket.end(
-        'HTTP/1.1 407 Proxy Authentication Required\r\nProxy-Authenticate: Basic realm="JumpServer Web Proxy"\r\nContent-Length: 0\r\nConnection: close\r\n\r\n'
+        'HTTP/1.1 407 Proxy Authentication Required\r\nProxy-Authenticate: Basic realm="XPAM Web Proxy"\r\nContent-Length: 0\r\nConnection: close\r\n\r\n'
       );
       return;
     }

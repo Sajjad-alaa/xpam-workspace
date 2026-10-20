@@ -5,7 +5,9 @@ import { marked } from "marked";
 
 export function renderAiMarkdown(source: string) {
   const html = marked.parse(source, { async: false, breaks: true, gfm: true }) as string;
-  return DOMPurify.sanitize(html);
+  // AI answers never load images (a planted instruction could make the model answer with an image
+  // whose address carries data to an attacker, fetched without any click)
+  return DOMPurify.sanitize(html, { FORBID_TAGS: ["img", "picture", "source", "video", "audio", "iframe"] });
 }
 
 export function formatAiDuration(value: unknown) {

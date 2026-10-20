@@ -131,7 +131,7 @@ test("applet retains an optional asset navigation allowlist and rejects malforme
 test("empty or terminal stdin starts an unrestricted standalone browser without credentials", async () => {
   for (const input of [Readable.from([]), Object.assign(Readable.from([]), { isTTY: true })]) {
     const result = await readLaunch(input);
-    assert.equal(result.targetUrl, "https://www.jumpserver.org/");
+    assert.equal(result.targetUrl, "about:blank");
     assert.equal(result.standalone, true);
     assert.equal(result.safeMode, false);
     assert.equal(result.localSession, null);

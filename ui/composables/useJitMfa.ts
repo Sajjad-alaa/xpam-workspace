@@ -7,12 +7,18 @@ interface JitMfaState {
 
 export const useJitMfaState = () => useState<JitMfaState>("xpam-jit-mfa", () => ({ open: false, resolve: null }));
 
+// several assets opened together share one prompt: one MFA check covers them all
+let pendingPrompt: Promise<boolean> | null = null;
+
 export function promptJitMfa(): Promise<boolean> {
+  if (pendingPrompt) return pendingPrompt;
   const state = useJitMfaState();
-  state.value.resolve?.(false);
-  return new Promise<boolean>((resolve) => {
+  pendingPrompt = new Promise<boolean>((resolve) => {
     state.value = { open: true, resolve };
+  }).finally(() => {
+    pendingPrompt = null;
   });
+  return pendingPrompt;
 }
 
 export function finishJitMfa(ok: boolean) {
