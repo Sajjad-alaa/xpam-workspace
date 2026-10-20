@@ -40,6 +40,7 @@ export interface JitPendingRequest {
   date_expired: string;
   date_created: string;
   reason: string;
+  extends?: string;
 }
 
 export interface JitRecentRequest {

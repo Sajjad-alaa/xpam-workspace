@@ -237,7 +237,10 @@ async function connect(grant: JitGrant, asset: JitGrant["assets"][number]) {
 }
 
 const extendItems = (grant: JitGrant) =>
-  [1, 2, 4].map((h) => ({ label: t("Access.ExtendBy", { h }), onSelect: () => extend(grant, h) }));
+  [1, 2, 4]
+    .filter((h) => h === 1 || h <= (grant.policy?.max_hours ?? 4))
+    .map((h) => ({ label: t("Access.ExtendBy", { h }), onSelect: () => extend(grant, h) }));
+const extensionWaiting = (grant: JitGrant) => (overview.value?.pending || []).some((p) => p.extends === grant.id);
 const connectItems = (grant: JitGrant) =>
   grant.assets.map((a) => ({ label: a.name, icon: categoryIcon(a.category), onSelect: () => connect(grant, a) }));
 
@@ -374,6 +377,9 @@ onMounted(() => {
               <UBadge v-if="!grant.active" color="neutral" variant="subtle" size="sm">
                 {{ t("Access.StartsAt", { time: formatTime(grant.date_start) }) }}
               </UBadge>
+              <UBadge v-if="extensionWaiting(grant)" color="info" variant="subtle" size="sm" icon="i-lucide-hourglass">
+                {{ t("Access.ExtensionWaiting") }}
+              </UBadge>
             </div>
             <div class="flex items-baseline justify-between gap-2">
               <div class="text-2xl font-semibold" :class="warnSoon(grant) ? 'text-[var(--ui-warning)]' : ''">
@@ -405,7 +411,7 @@ onMounted(() => {
                   {{ t("Access.Connect") }}
                 </UButton>
               </UDropdownMenu>
-              <UDropdownMenu :items="extendItems(grant)">
+              <UDropdownMenu :items="extendItems(grant)" :disabled="extensionWaiting(grant)">
                 <UButton
                   size="sm"
                   color="neutral"
@@ -413,6 +419,7 @@ onMounted(() => {
                   icon="i-lucide-clock-plus"
                   trailing-icon="i-lucide-chevron-down"
                   :loading="busy === grant.id"
+                  :disabled="extensionWaiting(grant)"
                 >
                   {{ t("Access.Extend") }}
                 </UButton>
@@ -531,7 +538,12 @@ onMounted(() => {
               class="flex items-center justify-between gap-2 rounded-md border border-[var(--app-border)] px-3 py-2 text-sm"
             >
               <span class="min-w-0">
-                <span class="block truncate">{{ p.assets.join(", ") }}</span>
+                <span class="block truncate">
+                  <UBadge v-if="p.extends" size="sm" variant="subtle" color="info" class="mr-1">
+                    {{ t("Access.ExtensionLabel") }}
+                  </UBadge>
+                  {{ p.assets.join(", ") }}
+                </span>
                 <span class="block text-xs text-[var(--app-text-muted)]">
                   {{ formatTime(p.date_start) }} – {{ formatTime(p.date_expired) }}
                 </span>

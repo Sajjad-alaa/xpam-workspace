@@ -2632,6 +2632,10 @@
     "ApprovedNextLevel": "Approved — the next approver decides now",
     "Rejected": "Rejected",
     "ApprovalsWaiting": "{n} access request(s) wait for your approval",
-    "Review": "Review"
+    "Review": "Review",
+    "ExtensionWaiting": "Extension waiting for approval",
+    "ExtensionLabel": "Extension",
+    "YourRequestApproved": "Your access request was approved",
+    "YourRequestNotApproved": "Your access request was not approved"
   }
 }

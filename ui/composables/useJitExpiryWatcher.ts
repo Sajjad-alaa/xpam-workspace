@@ -6,6 +6,7 @@ export function useJitExpiryWatcher() {
   const warned = new Set<string>();
   let lastGrants: string | null = null;
   let lastApprovals = 0;
+  let lastPending: Set<string> | null = null;
 
   async function check() {
     let data;
@@ -27,6 +28,24 @@ export function useJitExpiryWatcher() {
       });
     }
     lastApprovals = waiting;
+    // the user's own requests that were decided since the last check (approved, rejected, closed)
+    const pending = new Set(data.pending.map((p) => p.id));
+    for (const id of lastPending || []) {
+      if (pending.has(id)) continue;
+      const decided = data.recent.find((r) => r.id === id);
+      if (!decided) continue;
+      const approved = decided.state === "approved";
+      toast.add({
+        title: approved ? t("Access.YourRequestApproved") : t("Access.YourRequestNotApproved"),
+        description: [decided.title, decided.note ? `${decided.note.by}: ${decided.note.text}` : ""]
+          .filter(Boolean)
+          .join(" — "),
+        color: approved ? "success" : "neutral",
+        icon: approved ? "i-lucide-circle-check" : "i-lucide-circle-x",
+        actions: [{ label: t("Access.Open"), onClick: () => navigateTo(localePath({ path: "/access" })) }]
+      });
+    }
+    lastPending = pending;
     const skew = Date.parse(data.server_time) - Date.now();
     for (const grant of data.grants) {
       const key = `${grant.id}:${grant.date_expired}`;
