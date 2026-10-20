@@ -5,6 +5,8 @@ export const SFTP_FILE_MANAGER_VALUE = "sftp_file_manager";
 export const SFTP_FILE_EDITOR_VALUE = "sftp_file_editor";
 export const K8S_NATIVE_VALUE = "k8s_native";
 export const WEB_PROXY_NATIVE_VALUE = "web_proxy_native";
+// XPAM: web assets in the browser service, shown through Lion (any browser, no address bar)
+export const WEB_BROWSER_NATIVE_VALUE = "web_browser_native";
 
 export type WorkspaceComponentId = "koko" | "chen" | "lion";
 export type WorkspaceSurfaceKind =
@@ -100,6 +102,15 @@ export const COMPONENT_WORKSPACE_CAPABILITIES: WorkspaceCapabilityDeclaration[] 
     protocols: ["rdp", "vnc"],
     connectMethods: [WEB_RDP_NATIVE_VALUE],
     description: "ConnectMethod.RemoteDesktopDescription"
+  },
+  {
+    component: "lion",
+    surface: "remote-desktop",
+    label: "ConnectMethod.RemoteBrowser",
+    protocols: ["http", "https"],
+    connectMethods: [WEB_BROWSER_NATIVE_VALUE],
+    backendConnectMethod: "web_browser",
+    description: "ConnectMethod.RemoteBrowserDescription"
   },
   {
     component: "koko",

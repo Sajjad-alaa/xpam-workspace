@@ -8,6 +8,7 @@ import {
   isExternalClientConnectMethod,
   pickConnectMethod,
   useConnectMethods,
+  WEB_BROWSER_NATIVE_VALUE,
   WEB_PROXY_NATIVE_VALUE
 } from "~/composables/useConnectMethods";
 import { findFavoriteAssetFolderId, getFavoriteRootAssetCount } from "~/composables/useFavoriteFolders";
@@ -183,7 +184,7 @@ export function useSidebarAssetActions() {
   };
 
   const connectWebsiteDirectly = async (asset: AssetItem) => {
-    if (!isDesktopRuntime() || !isWebsiteAsset(asset)) return false;
+    if (!isWebsiteAsset(asset)) return false;
 
     try {
       const connectAsset = await loadAssetConnectionDetails(asset);
@@ -198,7 +199,14 @@ export function useSidebarAssetActions() {
 
       const protocol = protocols[0]!;
       const methods = await getMethodsForProtocol(protocol);
-      if (!methods.some((method) => method.value === WEB_PROXY_NATIVE_VALUE)) return false;
+      // XPAM: the remote browser works everywhere and never shows the site address;
+      // the client's built-in browser is the fallback when the browser service is off
+      const connectMethod = methods.some((method) => method.value === WEB_BROWSER_NATIVE_VALUE && !method.disabled)
+        ? WEB_BROWSER_NATIVE_VALUE
+        : isDesktopRuntime() && methods.some((method) => method.value === WEB_PROXY_NATIVE_VALUE)
+          ? WEB_PROXY_NATIVE_VALUE
+          : "";
+      if (!connectMethod) return false;
 
       const selectedAccount = resolveDirectWebsiteAccount(connectAsset);
       if (!selectedAccount) return false;
@@ -206,7 +214,7 @@ export function useSidebarAssetActions() {
       const session = openSession(connectAsset, {
         protocol,
         account: selectedAccount.account,
-        connectMethod: WEB_PROXY_NATIVE_VALUE
+        connectMethod
       });
       await confirmConnection(connectAsset, {
         protocol,
@@ -218,7 +226,7 @@ export function useSidebarAssetActions() {
         dynamicPassword: "",
         rememberSecret: false,
         rememberSelection: false,
-        connectMethod: WEB_PROXY_NATIVE_VALUE,
+        connectMethod,
         connectOptions: {},
         availableProtocols: protocols,
         tabId: session.id

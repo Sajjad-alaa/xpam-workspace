@@ -1395,7 +1395,9 @@
     "RemoteDesktop": "Remote desktop",
     "RemoteDesktopDescription": "RDP/VNC connections use the SecureConnection remote desktop workspace.",
     "BuiltinWebProxy": "Built-in Browser",
-    "BuiltinWebProxyDescription": "Website assets use the system WebView, with traffic routed through the SecureConnection web proxy."
+    "BuiltinWebProxyDescription": "Website assets use the system WebView, with traffic routed through the SecureConnection web proxy.",
+    "RemoteBrowser": "Remote browser",
+    "RemoteBrowserDescription": "Opens the website in a secure browser on the server: works in any browser and in the client, the site address is never shown and the login is filled in for you."
   },
   "ConnectError": {
     "DownloadRdpFailed": "Failed to download RDP file",

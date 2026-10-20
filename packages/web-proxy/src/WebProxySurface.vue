@@ -172,7 +172,9 @@ const statusSummary = computed(() =>
             : request.value?.proxyUrl
               ? "Connected through proxy"
               : "Connected",
-        autofillStatus.value === "unavailable" ? "Account autofill not configured" : `Account autofill: ${autofillLabel.value || "waiting for status"}`,
+        autofillStatus.value === "unavailable"
+          ? "Account autofill not configured"
+          : `Account autofill: ${autofillLabel.value || "waiting for status"}`,
         request.value?.recordingEnabled === false
           ? request.value?.proxyUrl
             ? request.value?.recordingSupported === false
@@ -298,7 +300,8 @@ async function completeVerification() {
   verificationCompletionError.value = "";
   try {
     if (!(await desktopWebProxy.completeVerification(viewLabel))) {
-      verificationCompletionError.value = "Verification cannot be completed right now; wait for the page to settle and try again";
+      verificationCompletionError.value =
+        "Verification cannot be completed right now; wait for the page to settle and try again";
     }
   } catch {
     verificationCompletionError.value = "Completing verification failed; please try again";
@@ -607,19 +610,15 @@ defineExpose({ focus, close: closeView });
         @click="reload"
       />
       <form class="relative min-w-0 flex-1" @submit.prevent="navigate">
-        <UInput
-          v-model="addressValue"
-          :icon="props.browsable ? 'i-lucide-globe-2' : 'i-lucide-lock-keyhole'"
-          size="sm"
-          class="w-full"
+        <!-- XPAM: the site address is never shown; only the asset name -->
+        <div
+          class="flex h-8 min-w-0 items-center gap-2 rounded-md border border-default px-2 text-sm"
           :class="{ invisible: autofillPending && !error }"
-          autocomplete="off"
-          spellcheck="false"
-          :disabled="navigationDisabled"
-          :readonly="!props.browsable"
-          :aria-label="props.browsable ? 'Address bar' : 'Address bar (read-only)'"
-          :title="props.browsable ? 'Enter an address and press Enter' : 'Manual address entry is not supported'"
-        />
+          aria-label="Page"
+        >
+          <UIcon name="i-lucide-lock-keyhole" class="size-4 shrink-0 text-muted" />
+          <span class="min-w-0 flex-1 truncate">{{ request?.title || "" }}</span>
+        </div>
         <div
           v-if="autofillPending && !error"
           class="absolute inset-0 flex min-w-0 items-center gap-2 rounded-md border border-default bg-default px-2 text-xs text-muted"
@@ -764,7 +763,10 @@ defineExpose({ focus, close: closeView });
         <textarea
           ref="verificationInputRef"
           class="sr-only"
-          :aria-label="verificationFrame?.focusLabel || 'Manual verification keyboard input: press Tab to choose a control, Escape to leave'"
+          :aria-label="
+            verificationFrame?.focusLabel ||
+            'Manual verification keyboard input: press Tab to choose a control, Escape to leave'
+          "
           autocomplete="off"
           autocapitalize="off"
           :spellcheck="false"

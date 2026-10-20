@@ -20,6 +20,7 @@ import {
   pickConnectMethod,
   SFTP_FILE_EDITOR_VALUE,
   SFTP_FILE_MANAGER_VALUE,
+  WEB_BROWSER_NATIVE_VALUE,
   WEB_DB_NATIVE_VALUE,
   WEB_PROXY_NATIVE_VALUE,
   WEB_RDP_NATIVE_VALUE
@@ -46,6 +47,7 @@ const NATIVE_WORKSPACE_METHODS = new Set([
   WEB_DB_NATIVE_VALUE,
   WEB_PROXY_NATIVE_VALUE,
   WEB_RDP_NATIVE_VALUE,
+  WEB_BROWSER_NATIVE_VALUE,
   SFTP_FILE_MANAGER_VALUE,
   SFTP_FILE_EDITOR_VALUE,
   K8S_NATIVE_VALUE
@@ -53,6 +55,7 @@ const NATIVE_WORKSPACE_METHODS = new Set([
 const NATIVE_WORKSPACE_METHOD_ORIGINS: Record<string, string> = {
   [WEB_CLI_NATIVE_METHOD]: "web_cli",
   [WEB_PROXY_NATIVE_VALUE]: "web_proxy",
+  [WEB_BROWSER_NATIVE_VALUE]: "web_browser",
   [SFTP_FILE_MANAGER_VALUE]: "web_sftp",
   [SFTP_FILE_EDITOR_VALUE]: "web_sftp",
   [K8S_NATIVE_VALUE]: "web_cli"
@@ -254,8 +257,7 @@ export const useAssetAction = () => {
     if (saved?.username) return saved.username;
 
     const list = accounts || [];
-    const acc =
-      list.find((a) => a && a.alias && !a.alias.startsWith("@")) || list.find((a) => a && a.alias === "@JIT");
+    const acc = list.find((a) => a && a.alias && !a.alias.startsWith("@")) || list.find((a) => a && a.alias === "@JIT");
 
     return acc?.name || "-";
   };
@@ -403,7 +405,10 @@ export const useAssetAction = () => {
         params.set("_", String(Date.now()));
         if (method?.value === "web_sftp") {
           params.set("asset", body.asset);
-          return joinEndpointUrl(endpointUrl, withWebSitePrefix(`/secureconnection/elfinder/sftp/?${params.toString()}`));
+          return joinEndpointUrl(
+            endpointUrl,
+            withWebSitePrefix(`/secureconnection/elfinder/sftp/?${params.toString()}`)
+          );
         }
         return joinEndpointUrl(endpointUrl, withWebSitePrefix(`/workspace/terminal/connect?${params.toString()}`));
       default:
@@ -671,7 +676,7 @@ export const useAssetAction = () => {
   };
 
   const resolveBuiltinComponent = (body: ConnectionBody) => {
-    if (body.connect_method === WEB_RDP_NATIVE_VALUE) return "lion";
+    if (body.connect_method === WEB_RDP_NATIVE_VALUE || body.connect_method === WEB_BROWSER_NATIVE_VALUE) return "lion";
     if (body.connect_method === WEB_DB_NATIVE_VALUE) return "chen";
     return "koko";
   };

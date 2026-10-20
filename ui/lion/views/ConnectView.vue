@@ -419,6 +419,12 @@ const scaleGuaDisplay = (value: number) => {
 };
 
 const isRemoteApp = computed(() => Boolean(sessionObject.value?.remote_app));
+// XPAM: a web asset in the browser service — no address bar, so offer back / forward / reload here
+const isWebBrowser = computed(() => ["http", "https"].includes(String(sessionObject.value?.protocol || "")));
+const KEY_ALT = 0xffe9;
+const browserBack = () => handleCombineKeys([KEY_ALT, 0xff51] as any);
+const browserForward = () => handleCombineKeys([KEY_ALT, 0xff53] as any);
+const browserReload = () => handleCombineKeys([0xffc2] as any);
 const remoteAppName = computed(() => {
   const name = sessionObject.value?.remote_app?.name;
   return typeof name === "string" && name ? name : String(sessionObject.value?.asset?.name || "");
@@ -517,6 +523,38 @@ watch(
       @bring-to-front="bringRemoteAppToFront"
       @end-session="endRemoteAppSession"
     />
+
+    <div v-if="isWebBrowser && connectStatus === 3" class="group absolute left-1/2 top-0 z-20 -translate-x-1/2 pt-0">
+      <div
+        class="flex items-center gap-0.5 rounded-b-lg border border-t-0 border-default bg-default/90 px-1.5 py-0.5 opacity-40 shadow-sm transition-opacity group-hover:opacity-100"
+      >
+        <UButton
+          icon="i-lucide-arrow-left"
+          color="neutral"
+          variant="ghost"
+          size="xs"
+          :aria-label="t('Back')"
+          @click="browserBack"
+        />
+        <UButton
+          icon="i-lucide-arrow-right"
+          color="neutral"
+          variant="ghost"
+          size="xs"
+          :aria-label="t('Forward')"
+          @click="browserForward"
+        />
+        <UButton
+          icon="i-lucide-rotate-cw"
+          color="neutral"
+          variant="ghost"
+          size="xs"
+          :aria-label="t('Reload')"
+          @click="browserReload"
+        />
+        <span class="max-w-48 truncate px-1 text-xs text-muted">{{ sessionObject?.asset?.name }}</span>
+      </div>
+    </div>
 
     <Osk v-if="showOsk" :keyboard="keyboardLayout" @keyboard-change="handleScreenKeyboard" />
   </div>
