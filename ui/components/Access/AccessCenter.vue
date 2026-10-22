@@ -1,6 +1,12 @@
 <script setup lang="ts">
 // XPAM zero standing privilege: the user's time-boxed access, requests and extensions in one place.
-import type { JitAccessOverview, JitApprovalItem, JitGrant, JitRequestableAsset } from "~/composables/useJitAccess";
+import type {
+  JitAccessOverview,
+  JitApprovalItem,
+  JitGrant,
+  JitRequestableAsset,
+  JitRoutePreview
+} from "~/composables/useJitAccess";
 import type { AssetItem } from "~/types";
 
 const { t } = useI18n();
@@ -129,23 +135,48 @@ const protocolOptions = computed(() =>
   intersect(selectedAssets.value.filter((a) => a.options).map((a) => a.options!.protocols))
 );
 const actionOptions = computed(() =>
-  intersect(selectedAssets.value.filter((a) => a.options).map((a) => a.options!.actions)).filter(
-    (a) => a !== "connect"
-  )
+  intersect(selectedAssets.value.filter((a) => a.options).map((a) => a.options!.actions)).filter((a) => a !== "connect")
 );
 watch([protocolOptions, actionOptions], ([p, a]) => {
   protocols.value = protocols.value.filter((x) => p.includes(x));
   actions.value = actions.value.filter((x) => a.includes(x));
   if (!actions.value.length) actions.value = DEFAULT_ACTIONS.filter((x) => a.includes(x));
 });
-const toggleIn = (list: typeof protocols, value: string) => {
+// (by name: in the template a ref is unwrapped, so passing the ref itself would change nothing)
+const toggleIn = (name: "protocols" | "actions", value: string) => {
+  const list = name === "protocols" ? protocols : actions;
   list.value = list.value.includes(value) ? list.value.filter((x) => x !== value) : [...list.value, value];
 };
 const reasonRequired = computed(() => selectedAssets.value.some((a) => a.policy.require_reason));
-const instant = computed(
-  () =>
-    selectedAssets.value.length > 0 &&
-    selectedAssets.value.every((a) => a.policy.auto_approve && hours.value <= a.policy.auto_approve_max_hours)
+// what happens when it is sent, as the server decides it (the rule's limit, hours, reason; who approves)
+const routePreview = ref<JitRoutePreview | null>(null);
+let previewTimer: ReturnType<typeof setTimeout> | undefined;
+let previewSeq = 0;
+watch(
+  [selected, hours, reason],
+  () => {
+    clearTimeout(previewTimer);
+    if (!selected.value.length || !(hours.value > 0)) {
+      routePreview.value = null;
+      return;
+    }
+    previewTimer = setTimeout(async () => {
+      const seq = ++previewSeq;
+      try {
+        const res = await previewJitRequest(selected.value, hours.value, reason.value.trim());
+        if (seq === previewSeq) routePreview.value = res;
+      } catch {
+        if (seq === previewSeq) routePreview.value = null;
+      }
+    }, 300);
+  },
+  { deep: true }
+);
+const instant = computed(() =>
+  routePreview.value
+    ? routePreview.value.instant
+    : selectedAssets.value.length > 0 &&
+      selectedAssets.value.every((a) => a.policy.auto_approve && hours.value <= a.policy.auto_approve_max_hours)
 );
 const canSubmit = computed(
   () =>
@@ -550,7 +581,7 @@ onMounted(() => {
                   size="xs"
                   :color="protocols.includes(p) ? 'primary' : 'neutral'"
                   :variant="protocols.includes(p) ? 'solid' : 'outline'"
-                  @click="toggleIn(protocols, p)"
+                  @click="toggleIn('protocols', p)"
                 >
                   {{ p.toUpperCase() }}
                 </UButton>
@@ -568,7 +599,7 @@ onMounted(() => {
                   size="xs"
                   :color="actions.includes(a) ? 'primary' : 'neutral'"
                   :variant="actions.includes(a) ? 'solid' : 'outline'"
-                  @click="toggleIn(actions, a)"
+                  @click="toggleIn('actions', a)"
                 >
                   {{ t(`Access.Action.${a}`) }}
                 </UButton>
@@ -589,9 +620,19 @@ onMounted(() => {
             >
               {{ instant ? t("Access.GetNow") : t("Access.SendRequest") }}
             </UButton>
-            <p v-if="selectedAssets.length" class="text-xs text-[var(--app-text-muted)]">
-              {{ instant ? t("Access.InstantHelp") : t("Access.ApprovalHelp") }}
-            </p>
+            <div v-if="selectedAssets.length" class="flex flex-col gap-1 text-xs text-[var(--app-text-muted)]">
+              <p>{{ instant ? t("Access.InstantHelp") : t("Access.ApprovalHelp") }}</p>
+              <template v-if="routePreview && !routePreview.instant">
+                <p v-if="routePreview.why" class="text-[var(--ui-warning)]">
+                  {{ t("Access.NotInstantWhy", { why: routePreview.why }) }}
+                </p>
+                <p v-for="step of routePreview.route" :key="step.level">
+                  <span class="font-medium">{{ t("Access.ApprovalLevel", { n: step.level }) }}</span>
+                  {{ step.approvers.join(", ") || "-" }}
+                  <span v-if="step.more">{{ t("Access.AndMore", { n: step.more }) }}</span>
+                </p>
+              </template>
+            </div>
           </div>
 
           <div v-if="overview?.pending.length" class="flex flex-col gap-1">

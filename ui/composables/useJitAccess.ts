@@ -108,6 +108,19 @@ export const requestJitAccess = (
     body: { assets, hours, reason, protocols, actions }
   });
 
+// XPAM: before sending — approved at once, or why it waits and who approves (level by level)
+export interface JitRoutePreview {
+  instant: boolean;
+  covered: boolean;
+  why: string;
+  rules?: string[];
+  flow?: string;
+  route: { level: number; approvers: string[]; more: number }[];
+}
+
+export const previewJitRequest = (assets: string[], hours: number, reason: string) =>
+  apiRequest<JitRoutePreview>({ method: "POST", path: `${BASE}preview/`, body: { assets, hours, reason } });
+
 export const extendJitAccess = (id: string, hours: number, reason: string) =>
   apiRequest<JitTicketBrief>({ method: "POST", path: `${BASE}${id}/extend/`, body: { hours, reason } });
 

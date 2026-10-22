@@ -1,5 +1,7 @@
+import type { WorkspaceMode } from "~/composables/useWorkspaceMode";
+
 interface ResolveAiPanelTargetOptions {
-  workspaceMode: "assets" | "files" | "tools";
+  workspaceMode: WorkspaceMode;
   paneId: string;
   ownerFileTargetId: string;
   ownerFileTargetAllowed: boolean;

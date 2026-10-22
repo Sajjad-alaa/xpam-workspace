@@ -2650,6 +2650,9 @@
       "paste": "Paste",
       "delete": "Delete files",
       "share": "Share the session"
-    }
+    },
+    "NotInstantWhy": "Not instant: {why}.",
+    "ApprovalLevel": "Level {n}:",
+    "AndMore": "and {n} more"
   }
 }
