@@ -2636,6 +2636,20 @@
     "ExtensionWaiting": "Extension waiting for approval",
     "ExtensionLabel": "Extension",
     "YourRequestApproved": "Your access request was approved",
-    "YourRequestNotApproved": "Your access request was not approved"
+    "YourRequestNotApproved": "Your access request was not approved",
+    "ConnectWith": "Connect with",
+    "AllProtocolsHint": "none chosen: every protocol you can use here",
+    "AllProtocols": "all protocols",
+    "Allow": "Also allow",
+    "Allows": "Allows",
+    "Action": {
+      "connect": "Connect",
+      "upload": "Upload",
+      "download": "Download",
+      "copy": "Copy",
+      "paste": "Paste",
+      "delete": "Delete files",
+      "share": "Share the session"
+    }
   }
 }

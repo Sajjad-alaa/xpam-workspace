@@ -75,6 +75,8 @@ export interface JitRequestableAsset extends JitAccessAsset {
   org_id: string;
   platform: string;
   policy: JitAccessPolicy;
+  // what a request for this asset may choose (its protocols the rule allows, the actions the rule allows)
+  options?: { protocols: string[]; actions: string[] };
 }
 
 export interface JitTicketBrief {
@@ -93,8 +95,18 @@ export const getJitAccess = () => apiRequest<JitAccessOverview>({ method: "GET",
 export const getJitRequestable = (search: string) =>
   apiRequest<JitRequestableAsset[]>({ method: "GET", path: `${BASE}requestable/`, query: search ? { search } : {} });
 
-export const requestJitAccess = (assets: string[], hours: number, reason: string) =>
-  apiRequest<JitTicketBrief>({ method: "POST", path: `${BASE}request/`, body: { assets, hours, reason } });
+export const requestJitAccess = (
+  assets: string[],
+  hours: number,
+  reason: string,
+  protocols: string[] = [],
+  actions: string[] = []
+) =>
+  apiRequest<JitTicketBrief>({
+    method: "POST",
+    path: `${BASE}request/`,
+    body: { assets, hours, reason, protocols, actions }
+  });
 
 export const extendJitAccess = (id: string, hours: number, reason: string) =>
   apiRequest<JitTicketBrief>({ method: "POST", path: `${BASE}${id}/extend/`, body: { hours, reason } });
@@ -135,6 +147,9 @@ export interface JitApprovalItem {
   level: number;
   levels: number;
   flags: JitApprovalFlag[];
+  // what the access would allow (["all"]: every protocol)
+  protocols?: string[];
+  actions?: string[];
 }
 
 export const getJitApprovals = () => apiRequest<JitApprovalItem[]>({ method: "GET", path: `${BASE}approvals/` });

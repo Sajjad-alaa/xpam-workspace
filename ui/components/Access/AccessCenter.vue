@@ -21,6 +21,10 @@ const chosen = ref<JitRequestableAsset[]>([]);
 const selected = computed(() => chosen.value.map((a) => a.id));
 const hours = ref(1);
 const reason = ref("");
+// what the access allows: the protocols (none chosen: every one offered) and the actions besides connecting
+const protocols = ref<string[]>([]);
+const DEFAULT_ACTIONS = ["upload", "download", "copy", "paste"];
+const actions = ref<string[]>([...DEFAULT_ACTIONS]);
 const submitting = ref(false);
 const confirmEnd = ref("");
 const busy = ref("");
@@ -118,6 +122,25 @@ const maxHours = computed(() =>
   selectedAssets.value.length ? Math.min(...selectedAssets.value.map((a) => a.policy.max_hours)) : 8
 );
 const presets = computed(() => PRESETS.filter((h) => h <= maxHours.value));
+// the choices every selected asset allows (assets of servers older than 5.1.18 give no options: no choice shown)
+const intersect = (lists: string[][]) =>
+  lists.length ? lists.reduce((acc, l) => acc.filter((x) => l.includes(x))) : [];
+const protocolOptions = computed(() =>
+  intersect(selectedAssets.value.filter((a) => a.options).map((a) => a.options!.protocols))
+);
+const actionOptions = computed(() =>
+  intersect(selectedAssets.value.filter((a) => a.options).map((a) => a.options!.actions)).filter(
+    (a) => a !== "connect"
+  )
+);
+watch([protocolOptions, actionOptions], ([p, a]) => {
+  protocols.value = protocols.value.filter((x) => p.includes(x));
+  actions.value = actions.value.filter((x) => a.includes(x));
+  if (!actions.value.length) actions.value = DEFAULT_ACTIONS.filter((x) => a.includes(x));
+});
+const toggleIn = (list: typeof protocols, value: string) => {
+  list.value = list.value.includes(value) ? list.value.filter((x) => x !== value) : [...list.value, value];
+};
 const reasonRequired = computed(() => selectedAssets.value.some((a) => a.policy.require_reason));
 const instant = computed(
   () =>
@@ -151,7 +174,10 @@ async function submit() {
   if (!canSubmit.value) return;
   submitting.value = true;
   try {
-    const ticket = await requestJitAccess(selected.value, hours.value, reason.value.trim());
+    const ticket = await requestJitAccess(selected.value, hours.value, reason.value.trim(), protocols.value, [
+      "connect",
+      ...actions.value
+    ]);
     if (ticket.state === "approved") {
       toast.add({
         title: t("Access.ApprovedNow"),
@@ -306,6 +332,11 @@ onMounted(() => {
               {{ f.text }}
             </UBadge>
             <UBadge v-for="r of item.rules" :key="r" size="sm" variant="outline" color="neutral">{{ r }}</UBadge>
+          </div>
+          <div v-if="item.protocols" class="text-xs text-[var(--app-text-muted)]">
+            {{ t("Access.Allows") }}:
+            {{ item.protocols.includes("all") ? t("Access.AllProtocols") : item.protocols.join(", ").toUpperCase() }}
+            · {{ (item.actions || []).map((a) => t(`Access.Action.${a}`)).join(", ") }}
           </div>
           <div class="flex flex-wrap items-center gap-2">
             <UButton size="sm" icon="i-lucide-check" :loading="busy === item.id" @click="decide(item, 'approve')">
@@ -508,6 +539,39 @@ onMounted(() => {
                   {{ h }} h
                 </UButton>
                 <UInputNumber v-model="hours" :min="1" :max="maxHours" size="xs" class="w-28" />
+              </div>
+            </div>
+            <div v-if="protocolOptions.length > 1" class="flex flex-col gap-1">
+              <span class="text-xs text-[var(--app-text-muted)]">{{ t("Access.ConnectWith") }}</span>
+              <div class="flex flex-wrap items-center gap-2">
+                <UButton
+                  v-for="p of protocolOptions"
+                  :key="p"
+                  size="xs"
+                  :color="protocols.includes(p) ? 'primary' : 'neutral'"
+                  :variant="protocols.includes(p) ? 'solid' : 'outline'"
+                  @click="toggleIn(protocols, p)"
+                >
+                  {{ p.toUpperCase() }}
+                </UButton>
+                <span v-if="!protocols.length" class="text-xs text-[var(--app-text-muted)]">
+                  {{ t("Access.AllProtocolsHint") }}
+                </span>
+              </div>
+            </div>
+            <div v-if="actionOptions.length" class="flex flex-col gap-1">
+              <span class="text-xs text-[var(--app-text-muted)]">{{ t("Access.Allow") }}</span>
+              <div class="flex flex-wrap items-center gap-2">
+                <UButton
+                  v-for="a of actionOptions"
+                  :key="a"
+                  size="xs"
+                  :color="actions.includes(a) ? 'primary' : 'neutral'"
+                  :variant="actions.includes(a) ? 'solid' : 'outline'"
+                  @click="toggleIn(actions, a)"
+                >
+                  {{ t(`Access.Action.${a}`) }}
+                </UButton>
               </div>
             </div>
             <UTextarea
