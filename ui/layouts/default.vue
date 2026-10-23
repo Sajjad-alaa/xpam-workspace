@@ -310,7 +310,7 @@ watch(
 // XPAM: warn before time-boxed access ends
 const jitExpiryWatcher = useJitExpiryWatcher();
 watch(
-  loggedIn,
+  () => Boolean(loggedIn.value && currentUser.value?.ticketsEnabled !== false),
   (value) => {
     if (!import.meta.client) return;
     if (value) jitExpiryWatcher.start();

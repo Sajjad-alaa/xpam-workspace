@@ -116,6 +116,8 @@ export interface CommandSnippetVariablePayload {
 export interface PublicSettings {
   CHAT_AI_ENABLED?: boolean;
   XPACK_LICENSE_IS_VALID?: boolean;
+  HAS_TICKET_LICENSE?: boolean;
+  TICKETS_ENABLED?: boolean;
   TERMINAL_RAZOR_ENABLED?: boolean;
   CONNECTION_TOKEN_REUSABLE?: boolean;
   XPACK_LICENSE_EDITION_ULTIMATE?: boolean;

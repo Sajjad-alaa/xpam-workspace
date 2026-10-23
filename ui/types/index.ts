@@ -186,6 +186,7 @@ export interface UserData {
   availableOrgs: PermOrgItem[];
   connectionInfo: ConnectionInfo;
   xpackLicenseValid?: boolean;
+  ticketsEnabled?: boolean;
   commandExecutionEnabled?: boolean;
 }
 

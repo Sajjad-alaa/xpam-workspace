@@ -337,6 +337,7 @@ export const useAuthSession = () => {
       system_roles: profileData.system_roles || [],
       availableOrgs,
       xpackLicenseValid: publicSettings?.XPACK_LICENSE_IS_VALID === true,
+      ticketsEnabled: Boolean(publicSettings?.TICKETS_ENABLED && publicSettings?.HAS_TICKET_LICENSE),
       commandExecutionEnabled: publicSettings?.SECURITY_COMMAND_EXECUTION === true,
       connectionInfo: {
         protocol: "",

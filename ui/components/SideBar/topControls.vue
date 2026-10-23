@@ -15,7 +15,7 @@ const headerIconButtonClass =
   "grid size-6 shrink-0 place-items-center rounded-lg p-0 text-gray-500 transition-colors hover:bg-black/6 hover:text-gray-800 dark:text-gray-400 dark:hover:bg-white/10 dark:hover:text-white";
 
 const workspaceModes = computed(() => {
-  return [
+  const modes: Array<{ key: "assets" | "files" | "access"; icon: string; label: string; tooltip: string }> = [
     {
       key: "assets",
       icon: "i-lucide-house",
@@ -27,14 +27,17 @@ const workspaceModes = computed(() => {
       icon: "i-lucide-folder-kanban",
       label: t("Menu.FileManager"),
       tooltip: t("Menu.FileManager")
-    },
-    {
+    }
+  ];
+  if (userInfoStore.currentUser?.ticketsEnabled !== false) {
+    modes.push({
       key: "access",
       icon: "i-lucide-key-round",
       label: t("Menu.Access"),
       tooltip: t("Menu.AccessTip")
-    }
-  ] as Array<{ key: "assets" | "files" | "access"; icon: string; label: string; tooltip: string }>;
+    });
+  }
+  return modes;
 });
 
 const setMode = async (mode: "assets" | "files" | "access") => {
