@@ -97,11 +97,11 @@ const progress = computed(() => {
 });
 const metric = computed(() => {
   if (!flow.value) return "";
-  if (flow.value.mode === "enroll") return `${flow.value.accepted_samples}/${flow.value.required_samples}`;
   if (flow.value.phase === "monitoring" && monitor.value) {
     return monitor.value.matched ? t("Face.Remote.Present") : t("Face.Remote.Away");
   }
-  return `${(Number(flow.value.similarity || 0) * 100).toFixed(1)}%`;
+  // (sign-in too: samples, not a similarity score — a score would help someone tune a photo to the stored face)
+  return `${flow.value.accepted_samples}/${flow.value.required_samples}`;
 });
 const tone = computed(() => {
   if (capture.clientState.value === "success" || capture.clientState.value === "active") return "success";
