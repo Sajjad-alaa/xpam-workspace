@@ -178,7 +178,8 @@ it.each([true, false])(
       autofillStartedAt: Date.now()
     });
     expect(surface.safeMode.value).toBe(safeMode);
-    expect(source).toContain(':readonly="!props.browsable"');
+    // (XPAM 5.1.7: the remote browser shows no site address: there is no address input to make read-only)
+    expect(source).not.toMatch(/<input[^>]*v-model="addressValue"/);
     expect(desktopWebProxy.navigate).not.toHaveBeenCalled();
     surface.history("back");
     surface.history("forward");
