@@ -67,6 +67,24 @@ const executable = process.env.WEBLITE_EXECUTABLE || (await import("electron")).
 const child = spawn(executable, ["--remote-debugging-port=0", ...(process.env.WEBLITE_EXECUTABLE ? [] : [applet])], {
   stdio: [standalone ? "ignore" : "pipe", "pipe", "pipe"]
 });
+if (standalone && process.env.WEBLITE_EXECUTABLE) {
+  // XPAM 5.1.10: the installed WebLite runs only for a connection (Tinker passes the launch data). Started on its own
+  // it must refuse (exit 1) instead of being a free, unrecorded browser on the publishing host's network.
+  const code = await new Promise((resolve) => {
+    const timer = setTimeout(() => {
+      child.kill();
+      resolve("still running");
+    }, 30000);
+    child.on("exit", (exitCode) => {
+      clearTimeout(timer);
+      resolve(exitCode);
+    });
+  });
+  server.close();
+  assert.equal(code, 1, "the installed WebLite must refuse to run without a connection");
+  console.info(`WebLite runtime ${mode}: refused without a connection (exit 1)`);
+  process.exit(0);
+}
 let stderr = "";
 child.stdout.on("data", (chunk) => {
   stderr += chunk;
