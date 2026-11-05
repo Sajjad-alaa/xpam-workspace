@@ -650,7 +650,7 @@
     "SQLAIMetadataSearch": "Table-name search",
     "SQLAIMetadataSearchLimit": "This search may match up to {count} tables. A changed search requires new approval.",
     "SQLAIMetadataFields": "Metadata provided to the model",
-    "SQLAIMetadataNoRows": "Business data rows are not queried or sent. Approval does not expand the permissions of the current JumpServer session or database account.",
+    "SQLAIMetadataNoRows": "Business data rows are not queried or sent. Approval does not expand the permissions of the current XPAM session or database account.",
     "SQLAIMetadataReject": "Reject",
     "SQLAIMetadataAllowOnce": "Allow for this request",
     "SQLAIMetadataAllowSession": "Allow for this session",
@@ -1126,8 +1126,8 @@
     "InvalidCertificateGeneric": "Login failed: certificate or secure connection issue.",
     "NetworkError": "Network unavailable. Please check connectivity.",
     "ServerError": "The server is temporarily unavailable. Please try again later.",
-    "VersionIncompatible": "The client version is incompatible with JumpServer versions earlier than v4.10.12-lts. Please download and use the v3.0.7 client.",
-    "VersionNoMatch": "The client version does not match the JumpServer version. Please download and use the v{version} client, or upgrade JumpServer to the latest version."
+    "VersionIncompatible": "This client is not compatible with this XPAM server. Please download the client from the server's Download page.",
+    "VersionNoMatch": "The client version does not match this XPAM server. Please download and use the v{version} client from the server's Download page, or upgrade XPAM."
   },
   "Asset": {
     "GetAssetFailed": "Get asset failed, please refresh and try again"
@@ -1173,7 +1173,7 @@
     "TokenCommand": "Connect command (token)",
     "DirectCommand": "Connect command (direct by asset ID)",
     "TokenPasswordHelp": "Use the token password in the table above.",
-    "DirectPasswordHelp": "Use your JumpServer login password.",
+    "DirectPasswordHelp": "Use your XPAM login password.",
     "DirectUnavailable": "The login username or asset account is unavailable. Reopen the connection guide.",
     "Title": "Connection guide",
     "Name": "Name",
@@ -1220,13 +1220,13 @@
     "JoinedAt": "Date joined",
     "ExpiresAt": "Expiration date",
     "SiteAccounts": "Site accounts",
-    "SiteAccountsDescription": "Manage the JumpServer sites signed in on this client.",
+    "SiteAccountsDescription": "Manage the XPAM sites signed in on this client.",
     "Current": "Current",
     "Switch": "Switch",
     "LoadFailed": "Failed to load user profile",
     "Retry": "Retry",
     "NoUser": "Not signed in",
-    "NoUserDescription": "Sign in to a JumpServer site to view user details."
+    "NoUserDescription": "Sign in to an XPAM site to view user details."
   },
   "Setting": {
     "BackToApp": "Back to app",
@@ -1322,7 +1322,7 @@
     "CopyPathSuccess": "Path copied",
     "SelectPath": "Select path",
     "PluginManager": "Plugin Manager",
-    "JumpServerPluginFile": "JumpServer plugin",
+    "JumpServerPluginFile": "XPAM plugin",
     "ZipArchiveFile": "ZIP archive",
     "ExecutableFile": "Executable",
     "ManagePlugins": "Manage plugins",
@@ -1366,14 +1366,14 @@
     "CustomTerminalMissingFields": "Please fill in the name, path, and launch template",
     "TerminalSettings": "Terminal",
     "TerminalHosts": "Terminal Hosts",
-    "TerminalHostsDescription": "Choose which terminal window should open and run the JumpServer connection command.",
+    "TerminalHostsDescription": "Choose which terminal window should open and run the XPAM connection command.",
     "TerminalOption": "Terminal",
     "TerminalOptionDescription": "Open this protocol in the terminal selected in Terminal settings.",
     "TerminalCurrentPrefix": "Current terminal: ",
     "TerminalClients": "Dedicated Terminal Clients",
     "TerminalClientsDescription": "These clients speak SSH or Telnet directly with their own command-line arguments.",
-    "TerminalSettingsDescription": "Configure the terminal window JumpServer should use before opening SSH or Telnet sessions.",
-    "TerminalProgramDescription": "Choose which terminal program JumpServer should use for character-based sessions. If needed, configure the executable path on the selected item.",
+    "TerminalSettingsDescription": "Configure the terminal window XPAM should use before opening SSH or Telnet sessions.",
+    "TerminalProgramDescription": "Choose which terminal program XPAM should use for character-based sessions. If needed, configure the executable path on the selected item.",
     "SshTerminalDescription": "Select which terminal host should open SSH sessions.",
     "TelnetTerminalDescription": "Select which terminal host should open Telnet sessions."
   },
