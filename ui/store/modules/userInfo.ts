@@ -104,14 +104,14 @@ export const useUserInfoStore = defineStore(
      */
     const syncApiSession = async (accountId: string, userData: UserData) => {
       if (!isDesktopRuntime()) return;
-      if (!accountId || !userData.bearerToken || !userData.org?.id) return;
+      if (!accountId || !userData.bearerToken) return;
 
       try {
         await desktopInvoke("set_api_session", {
           sessionKey: accountId,
           origin: userData.site,
           bearerToken: userData.bearerToken,
-          orgId: userData.org.id
+          orgId: userData.org?.id || ""
         });
       } catch (error) {
         console.error("sync api session failed", error);

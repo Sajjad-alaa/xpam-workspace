@@ -490,6 +490,7 @@
     "MetricsLoading": "Reading Linux system metrics…",
     "MetricsUnavailable": "System metrics are unavailable for this connection",
     "MetricsCached": "Cached",
+    "Latency": "Latency {latency} ms",
     "MetricsUptimeDays": "{days}d {hours}h",
     "MetricsUptimeHours": "{hours}h",
     "OnlineUsers": "Online users",

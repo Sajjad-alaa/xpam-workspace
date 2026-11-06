@@ -1,6 +1,7 @@
 {
   "name": "xpam-client",
   "productName": "XPAM",
+  "desktopName": "xpam-client.desktop",
   "version": "5.1.0",
   "private": true,
   "description": "XPAM desktop client",

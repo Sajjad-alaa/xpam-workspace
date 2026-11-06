@@ -234,6 +234,8 @@ const config: ForgeConfig = {
       }
     }),
     new MakerWix({
+      // Fixed MSI UpgradeCode: NEVER change it, or each release installs side by side instead of upgrading.
+      upgradeCode: "F5905F9F-1F91-4946-B60F-FC68EC238D9D",
       defaultInstallMode: "perMachine",
       exe: `${executableName}.exe`,
       icon: path.join(iconsRoot, "icon.ico"),
@@ -248,6 +250,7 @@ const config: ForgeConfig = {
       options: {
         bin: executableName,
         categories: ["Development"],
+        mimeType: [`x-scheme-handler/${CLIENT_PROTOCOL}`],
         icon: path.join(iconsRoot, "icon.png")
       }
     }),
@@ -255,6 +258,7 @@ const config: ForgeConfig = {
       options: {
         bin: executableName,
         categories: ["Development"],
+        mimeType: [`x-scheme-handler/${CLIENT_PROTOCOL}`],
         icon: path.join(iconsRoot, "icon.png")
       }
     })

@@ -255,7 +255,7 @@ const canShare = computed(() => {
                 </UBadge>
                 <span class="inline-flex shrink-0 items-center gap-1 font-ui-mono">
                   <UIcon name="i-lucide-radio" class="size-3" />
-                  Koko {{ metricsState?.latencyMs == null ? "--" : `${metricsState.latencyMs} ms` }}
+                  {{ t("RightPanel.Latency", { latency: metricsState?.latencyMs == null ? "--" : metricsState.latencyMs }) }}
                 </span>
               </div>
               <UIcon

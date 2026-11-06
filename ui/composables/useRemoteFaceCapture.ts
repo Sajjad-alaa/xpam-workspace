@@ -103,7 +103,7 @@ export function useRemoteFaceCapture(options: UseRemoteFaceCaptureOptions) {
         socketBaseUrl: String(runtimeConfig.public.faceLiveSocketBaseUrl || "")
       };
     }
-    if (!userInfoStore.currentSite) throw new Error("Current JumpServer site is unavailable");
+    if (!userInfoStore.currentSite) throw new Error("The current XPAM site is unavailable");
     return { siteUrl: userInfoStore.currentSite, rendererPath: new URL(userInfoStore.currentSite).pathname };
   }
 

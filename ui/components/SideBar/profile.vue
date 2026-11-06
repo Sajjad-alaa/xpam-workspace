@@ -526,18 +526,11 @@ const emitVersionAlertAndCloseModal = (payload: VersionAlertPayload) => {
   useEventBus().emit("versionAlert", payload);
 };
 
-const checkVersionBeforeOAuth = async (accountId: string, site: string) => {
+const checkVersionBeforeOAuth = async (site: string) => {
   if (!isDesktopRuntime()) return true;
 
-  await desktopInvoke("set_api_session", {
-    sessionKey: accountId,
-    origin: site,
-    bearerToken: "",
-    orgId: ""
-  });
-
   const [versionResponse, appVersion] = await Promise.all([
-    desktopInvoke<VersionMessageResponse>("get_version_message").catch(() => {
+    desktopInvoke<VersionMessageResponse>("get_version_message", { origin: site }).catch(() => {
       return null;
     }),
     desktopApp.getVersion().catch(() => "")
@@ -791,7 +784,7 @@ const handleConfirm = async () => {
     clearLoginBtnUnlockTimer();
     loginBtn.value = true;
     const accountId = editingAccountId.value || globalThis.crypto.randomUUID();
-    const ok = await checkVersionBeforeOAuth(accountId, normalizedSite);
+    const ok = await checkVersionBeforeOAuth(normalizedSite);
     if (!ok) return;
 
     const payload = await desktopInvoke<any>("auth_login", {

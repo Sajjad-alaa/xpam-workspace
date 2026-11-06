@@ -245,8 +245,11 @@ export class DesktopAuthService {
     }
   }
 
-  async getVersionMessage() {
-    return this.requestApiResponse(this.currentSession().origin, CLIENT_VERSIONS, { timeout: 10_000 });
+  async getVersionMessage({ origin = "" }: { origin?: string } = {}) {
+    // An explicit origin queries that site directly without touching the current session.
+    if (origin && !["http:", "https:"].includes(parseUrl(origin).protocol)) throw new Error("site must use HTTP or HTTPS");
+    const site = origin ? origin.replace(/\/+$/, "") : this.currentSession().origin;
+    return this.requestApiResponse(site, CLIENT_VERSIONS, { timeout: 10_000 });
   }
 
   async syncBackendLanguage({ language }) {
@@ -351,7 +354,22 @@ export class DesktopAuthService {
     };
   }
 
+  refreshing = new Map<string, Promise<string>>();
+
+  // Single-flight per session: refresh tokens rotate, so parallel refreshes would hit invalid_grant.
   async freshToken(site, sessionId, provided = "") {
+    const pending = this.refreshing.get(sessionId);
+    if (pending) return pending;
+    const run = this.freshTokenOnce(site, sessionId, provided);
+    this.refreshing.set(sessionId, run);
+    try {
+      return await run;
+    } finally {
+      if (this.refreshing.get(sessionId) === run) this.refreshing.delete(sessionId);
+    }
+  }
+
+  async freshTokenOnce(site, sessionId, provided = "") {
     const stored = this.tokens[sessionId];
     if (!stored) {
       if (provided) return provided;
