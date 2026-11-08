@@ -1,20 +1,17 @@
 <script setup lang="ts">
 import { getPublicSettings } from "~/composables/useApiRequest";
-import { getConfiguredAppName, isDefaultAppName, normalizeAppName } from "~/composables/useAppName";
-import { desktopApp, desktopOpener } from "~/shared/desktop/bridge";
+import { getConfiguredAppName, normalizeAppName } from "~/composables/useAppName";
+import { desktopApp } from "~/shared/desktop/bridge";
 import { useUserInfoStore } from "~/store/modules/userInfo";
 
 const FALLBACK_LOGO = "/logo.png";
 const appName = ref(getConfiguredAppName());
 const logoSrc = ref(FALLBACK_LOGO);
-const isDefaultProduct = computed(() => isDefaultAppName(appName.value));
-const website = "https://jumpserver.org";
 
 const productVersion = ref("");
 const licenseCompany = ref("");
 const licenseEditionName = ref("");
 const isEnterpriseEdition = ref(false);
-const showCommunityLinks = ref(false);
 const isWebRuntime = computed(() => !isDesktopRuntime());
 const downloadCenterUrl = computed(() =>
   import.meta.client ? withWebSitePrefix("/core/download/") : "/core/download/"
@@ -29,23 +26,6 @@ const productInfo = computed(() => [
   },
   { label: t("Common.Version"), value: productVersion.value || "—" },
   { label: t("Setting.LicenseCompany"), value: licenseCompany.value || "—" }
-]);
-const links = computed(() => [
-  {
-    label: "GitHub",
-    icon: "line-md:github",
-    to: "https://github.com/jumpserver/jumpserver"
-  },
-  {
-    label: "Discord",
-    icon: "line-md:discord",
-    to: "https://discord.com/invite/W6vYXmAQG2"
-  },
-  {
-    label: t("Setting.OfficialWebsite"),
-    icon: "i-lucide-globe-2",
-    to: website
-  }
 ]);
 
 function resolveInterfaceLogo(path?: string) {
@@ -83,7 +63,6 @@ onMounted(async () => {
     const hasLicense = settings.XPACK_LICENSE_IS_VALID === true;
 
     isEnterpriseEdition.value = hasLicense;
-    showCommunityLinks.value = !hasLicense;
 
     if (settings.INTERFACE?.login_title) {
       appName.value = settings.INTERFACE.login_title.trim();
@@ -112,23 +91,8 @@ onMounted(async () => {
     }
 
     logoSrc.value = resolveInterfaceLogo(settings.INTERFACE?.logo_logout || settings.INTERFACE?.logo_index);
-  } catch {
-    showCommunityLinks.value = true;
-  }
+  } catch {}
 });
-
-const openLink = async (url: string) => {
-  if (!isDesktopRuntime()) {
-    window.open(url, "_blank", "noopener,noreferrer");
-    return;
-  }
-
-  try {
-    await desktopOpener.openUrl(url);
-  } catch (e) {
-    console.error("open link failed", e);
-  }
-};
 </script>
 
 <template>
@@ -174,19 +138,6 @@ const openLink = async (url: string) => {
             </dd>
           </div>
         </dl>
-
-        <div v-if="isDefaultProduct && showCommunityLinks" class="flex flex-wrap gap-1 px-4 py-3 sm:px-7">
-          <UButton
-            v-for="link in links"
-            :key="link.to"
-            :label="link.label"
-            :icon="link.icon"
-            color="neutral"
-            variant="ghost"
-            size="sm"
-            @click="openLink(link.to)"
-          />
-        </div>
       </div>
     </section>
   </div>
