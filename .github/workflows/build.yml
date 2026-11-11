@@ -142,9 +142,12 @@ jobs:
         if: >-
           github.event_name == 'workflow_dispatch'
           && inputs.product_name != ''
+        # (passed through the environment: an expression in a run line is pasted into the shell script)
+        env:
+          PRODUCT_NAME: ${{ inputs.product_name }}
         run: >-
           node scripts/set-product-name.mjs
-          --name "${{ inputs.product_name }}"
+          --name "$PRODUCT_NAME"
 
       - name: Apply custom brand assets
         if: >-
