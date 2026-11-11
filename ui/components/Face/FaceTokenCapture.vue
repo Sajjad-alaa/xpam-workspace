@@ -124,7 +124,7 @@ const statusIconClass = computed(() => ({
 
 function requestRetry() {
   publish({
-    source: "jumpserver-facelive",
+    source: "xpam-facelive",
     event: "retry_requested",
     mode: props.mode,
     ...(flow.value ? { flow: flow.value } : {})
@@ -134,7 +134,7 @@ function requestRetry() {
 
 onMounted(() => {
   mounted = true;
-  publish({ source: "jumpserver-facelive", event: "page_ready", mode: props.mode });
+  publish({ source: "xpam-facelive", event: "page_ready", mode: props.mode });
   void capture.start();
 });
 

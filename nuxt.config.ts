@@ -246,7 +246,14 @@ export default defineNuxtConfig({
     },
     build: {
       sourcemap: false,
-      modulePreload: false
+      modulePreload: false,
+      // The served files are named by their content hash only: no component or source file names in them
+      // (the JavaScript chunks already are; this covers the style sheets and other assets).
+      rollupOptions: {
+        output: {
+          assetFileNames: "_nuxt/[hash][extname]"
+        }
+      }
     }
   },
   devServer: {

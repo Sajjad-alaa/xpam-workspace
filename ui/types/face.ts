@@ -211,7 +211,7 @@ export interface FaceLiveFrameMessage {
 }
 
 export interface FaceLiveHostMessage {
-  source: "jumpserver-facelive";
+  source: "xpam-facelive";
   event: string;
   mode: FaceLivePageMode;
   flow?: FaceLiveServerFlow;

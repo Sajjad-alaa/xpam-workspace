@@ -1,6 +1,6 @@
 import type { FaceLiveHostMessage, FaceLivePageMode } from "~/types/face";
 
-export const FACE_LIVE_MESSAGE_SOURCE = "jumpserver-facelive" as const;
+export const FACE_LIVE_MESSAGE_SOURCE = "xpam-facelive" as const;
 export const FACE_CAPTURE_TOKEN_PATTERN = /^[A-Za-z0-9_-]{16,128}$/;
 
 const trimPath = (path: string) => {

@@ -76,7 +76,7 @@ describe("face live security helpers", () => {
     expect(isFaceCaptureToken("a".repeat(16))).toBe(true);
     expect(isFaceCaptureToken("short")).toBe(false);
     expect(isFaceCaptureToken(`bad/${"a".repeat(20)}`)).toBe(false);
-    expect(isFaceLiveHostMessage({ source: "jumpserver-facelive", event: "retry_requested", mode: "capture" })).toBe(
+    expect(isFaceLiveHostMessage({ source: "xpam-facelive", event: "retry_requested", mode: "capture" })).toBe(
       true
     );
     expect(isFaceLiveHostMessage({ source: "other", event: "retry_requested", mode: "capture" })).toBe(false);
