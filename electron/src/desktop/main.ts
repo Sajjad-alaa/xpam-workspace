@@ -1492,23 +1492,28 @@ app.whenReady().then(async () => {
     }
     const fingerprint = String(request.certificate?.fingerprint || "");
     const decision = certificatePins.decide(request.hostname, request.errorCode, fingerprint);
-    if (decision !== "ask") {
+    if (decision !== "ask" && decision !== "first") {
       callback(decision);
       return;
     }
     const key = `${request.hostname}|${fingerprint}`;
-    // one question per changed certificate, however many connections ask at the same time
+    const first = decision === "first";
+    // one question per certificate, however many connections ask at the same time
     let pending = certificatePrompts.get(key);
     if (!pending) {
       pending = dialog
         .showMessageBox({
           type: "warning",
-          title: "Server certificate changed",
-          message: `The certificate of ${request.hostname} is not the one this computer trusted before.`,
-          detail:
-            "Continue only if your administrator replaced the server certificate. Otherwise someone may be " +
-            `intercepting the connection.\n\nNew fingerprint: ${fingerprint}`,
-          buttons: ["Cancel", "Trust the new certificate"],
+          title: first ? "Untrusted server certificate" : "Server certificate changed",
+          message: first
+            ? `The certificate of ${request.hostname} cannot be verified (for example, it is self-signed).`
+            : `The certificate of ${request.hostname} is not the one this computer trusted before.`,
+          detail: first
+            ? "Continue only if this fingerprint is the one your administrator gave you. This computer will " +
+              `then trust this certificate for this server.\n\nFingerprint: ${fingerprint}`
+            : "Continue only if your administrator replaced the server certificate. Otherwise someone may be " +
+              `intercepting the connection.\n\nNew fingerprint: ${fingerprint}`,
+          buttons: ["Cancel", first ? "Trust this certificate" : "Trust the new certificate"],
           defaultId: 0,
           cancelId: 0,
           noLink: true
