@@ -1478,7 +1478,14 @@ app.whenReady().then(async () => {
   await registerProtocols();
   applicationConfig = new ApplicationConfigService(app, projectRoot);
   await applicationConfig.initialize();
-  localApplicationLauncher = new LocalApplicationLauncher(app, projectRoot, applicationConfig, shell, !isDevelopment);
+  localApplicationLauncher = new LocalApplicationLauncher(
+    app,
+    projectRoot,
+    applicationConfig,
+    shell,
+    !isDevelopment,
+    (host: string) => Boolean(authService?.isTrustedSiteHost(host))
+  );
   authService = new DesktopAuthService(emitDesktopEvent);
   await authService.initialize();
   const certificatePins = new CertificatePins(app.getPath("userData"));

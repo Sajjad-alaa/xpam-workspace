@@ -59,7 +59,15 @@ test("Windows RDP launch preserves a connection file path containing spaces and 
     },
     { platform: "win32", env: {} } as NodeJS.Process
   );
-  const launcher = new LocalApplicationLauncher({}, "", { configDir: "C:\\Users\\Test User\\JumpServer" }, null);
+  // (the file points at a server the client knows: no question)
+  const launcher = new LocalApplicationLauncher(
+    {},
+    "",
+    { configDir: "C:\\Users\\Test User\\JumpServer" },
+    null,
+    true,
+    (host: string) => host === "127.0.0.1"
+  );
   let finished = false;
   const launch = launcher
     .launchFile(
@@ -376,4 +384,45 @@ test("development login waits for an in-progress callback listener and preserves
   callback.searchParams.set("state", authorize.searchParams.get("state"));
   assert.equal(service.handleCallback(callback.toString()), true);
   assert.equal((await login).status, "success");
+});
+
+test("a connection file for a server the client does not know opens only after the user confirms", async () => {
+  const asked: string[] = [];
+  let spawned = false;
+  for (const answer of [0, 1]) {
+    const { LocalApplicationLauncher } = loadWithElectronMocks("../src/apps/local-app-launcher.ts", {
+      electron: {
+        dialog: {
+          showMessageBox: async (options: { detail: string }) => {
+            asked.push(options.detail);
+            return { response: answer };
+          }
+        }
+      },
+      "node:fs/promises": { mkdir: async () => {}, writeFile: async () => {}, stat: async () => ({ isFile: () => true }) },
+      "node:child_process": {
+        spawn: () => {
+          spawned = true;
+          const child = new EventEmitter() as EventEmitter & { unref: () => void };
+          child.unref = () => {};
+          setImmediate(() => child.emit("spawn"));
+          return child;
+        }
+      }
+    });
+    const launcher = new LocalApplicationLauncher({}, "", { configDir: "/tmp/xpam-test" }, null, true, () => false);
+    const result = await launcher.launchFile(
+      { path: "/usr/bin/xfreerdp", arg_format: "{file}" },
+      { protocol: "rdp", file: { name: "asset", content: "full address:s:evil.example:3389\ndrivestoredirect:s:*\n" } }
+    );
+    if (answer === 0) {
+      assert.equal(result, false);
+      assert.equal(spawned, false);
+    } else {
+      assert.equal(spawned, true);
+    }
+  }
+  assert.equal(asked.length, 2);
+  assert.match(asked[0], /evil\.example:3389/);
+  assert.match(asked[0], /drives/);
 });

@@ -20,6 +20,41 @@ async function confirmCommandLaunch(payload) {
   return response === 1;
 }
 
+// XPAM: a jms2:// link can carry a whole connection file and any website can open such a link. A file that points
+// at a server the client does not know, or that shares this computer's drives or devices, could connect the user
+// to an attacker's machine and hand it local files: such a file opens only after the user confirms what it does.
+export function connectionFileTarget(protocol, content) {
+  const text = String(content || "");
+  const pick = (pattern) => (text.match(pattern)?.[1] || "").trim();
+  const address = protocol === "rdp" ? pick(/^full address:s:(.*)$/im) : pick(/^host=(.*)$/im);
+  const bracketed = address.match(/^\[([^\]]+)\]/);
+  const host = (bracketed ? bracketed[1] : address.replace(/:\d+$/, "")).toLowerCase();
+  const shares = [];
+  if (protocol === "rdp") {
+    if (/^(?:drivestoredirect:s:[^\r\n]+|redirectdrives:i:1\r?)$/im.test(text)) shares.push("drives");
+    if (/^(?:devicestoredirect:s:[^\r\n]+|redirect(?:smartcards|comports|printers):i:1\r?)$/im.test(text)) {
+      shares.push("devices");
+    }
+    if (/^redirectclipboard:i:1\r?$/im.test(text)) shares.push("clipboard");
+  }
+  return { address, host, shares };
+}
+
+async function confirmFileLaunch(protocol, target) {
+  const shares = target.shares.length ? `\n\nIt shares this computer's ${target.shares.join(", ")} with that server.` : "";
+  const { response } = await dialog.showMessageBox({
+    type: "warning",
+    title: "Open connection?",
+    message: `A link is asking to open a ${protocol.toUpperCase()} connection to a server this client does not know.`,
+    detail: `Server: ${target.address || "(not given)"}${shares}\n\nOnly continue if you started this connection yourself.`,
+    buttons: ["Cancel", "Open connection"],
+    defaultId: 0,
+    cancelId: 0,
+    noLink: true
+  });
+  return response === 1;
+}
+
 function decodePayload(raw) {
   const value = String(raw || "");
   const encoded = value.startsWith("jms2://") ? value.slice(7) : "";
@@ -187,12 +222,13 @@ export class LocalApplicationLauncher {
   // ponytail: migration keeps legacy dynamic state; replace with explicit launcher adapter types when strict mode is enabled.
   [key: string]: any;
 
-  constructor(app, projectRoot, configService, electronShell, isPackaged = app.isPackaged) {
+  constructor(app, projectRoot, configService, electronShell, isPackaged = app.isPackaged, isTrustedHost = (_host) => false) {
     this.app = app;
     this.projectRoot = projectRoot;
     this.configService = configService;
     this.electronShell = electronShell;
     this.isPackaged = isPackaged;
+    this.isTrustedHost = isTrustedHost;
   }
 
   helperCommand() {
@@ -268,6 +304,13 @@ export class LocalApplicationLauncher {
 
   async launchFile(application, payload) {
     const extension = payload.protocol === "rdp" ? "rdp" : "vnc";
+    const target = connectionFileTarget(extension, payload.file?.content);
+    if (!target.host || !this.isTrustedHost(target.host)) {
+      if (!(await confirmFileLaunch(extension, target))) {
+        electronLog.warn(`refused jms2 ${extension} connection file for ${target.address || "an unknown server"}`);
+        return false;
+      }
+    }
     const base = sanitizedName(payload.file?.name || payload.name) || "connection";
     const connectionPath = path.join(this.configService.configDir, `${base}.${extension}`);
     await mkdir(this.configService.configDir, { recursive: true });
